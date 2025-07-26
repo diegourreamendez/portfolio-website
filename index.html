@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diego Urrea Méndez - Hydrologist & Data Scientist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a1628;
+            color: white;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Rain Animation - More Visible */
+        .rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .drop {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, rgba(88, 166, 255, 0.8), transparent);
+            animation: fall linear infinite;
+        }
+
+        .drop:nth-child(1) { left: 5%; animation-duration: 1.2s; animation-delay: 0s; }
+        .drop:nth-child(2) { left: 15%; animation-duration: 0.9s; animation-delay: 0.3s; }
+        .drop:nth-child(3) { left: 25%; animation-duration: 1.1s; animation-delay: 0.6s; }
+        .drop:nth-child(4) { left: 35%; animation-duration: 0.8s; animation-delay: 0.2s; }
+        .drop:nth-child(5) { left: 45%; animation-duration: 1.3s; animation-delay: 0.8s; }
+        .drop:nth-child(6) { left: 55%; animation-duration: 1.0s; animation-delay: 0.4s; }
+        .drop:nth-child(7) { left: 65%; animation-duration: 0.7s; animation-delay: 0.1s; }
+        .drop:nth-child(8) { left: 75%; animation-duration: 1.2s; animation-delay: 0.7s; }
+        .drop:nth-child(9) { left: 85%; animation-duration: 0.9s; animation-delay: 0.5s; }
+        .drop:nth-child(10) { left: 95%; animation-duration: 1.1s; animation-delay: 0.9s; }
+        .drop:nth-child(11) { left: 10%; animation-duration: 1.0s; animation-delay: 1.1s; }
+        .drop:nth-child(12) { left: 20%; animation-duration: 0.8s; animation-delay: 0.3s; }
+        .drop:nth-child(13) { left: 30%; animation-duration: 1.4s; animation-delay: 0.6s; }
+        .drop:nth-child(14) { left: 40%; animation-duration: 0.9s; animation-delay: 1.0s; }
+        .drop:nth-child(15) { left: 50%; animation-duration: 1.1s; animation-delay: 0.2s; }
+        .drop:nth-child(16) { left: 60%; animation-duration: 0.7s; animation-delay: 0.8s; }
+        .drop:nth-child(17) { left: 70%; animation-duration: 1.3s; animation-delay: 0.4s; }
+        .drop:nth-child(18) { left: 80%; animation-duration: 1.0s; animation-delay: 0.7s; }
+        .drop:nth-child(19) { left: 90%; animation-duration: 0.8s; animation-delay: 0.1s; }
+        .drop:nth-child(20) { left: 12%; animation-duration: 1.2s; animation-delay: 0.5s; }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0.3;
+            }
+        }
+
+        /* Lightning Effect */
+        .lightning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(88, 166, 255, 0.1);
+            z-index: -2;
+            opacity: 0;
+            animation: flash 12s infinite;
+        }
+
+        @keyframes flash {
+            0%, 85%, 87%, 89%, 91%, 100% { opacity: 0; }
+            86%, 88%, 90% { opacity: 0.6; }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 22, 40, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(88, 166, 255, 0.2);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #8892b0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #58a6ff;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #58a6ff;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .main-title {
+            font-size: 4rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            color: white;
+            line-height: 1.1;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: #8892b0;
+            max-width: 700px;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(88, 166, 255, 0.1);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #58a6ff;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .social-link sup {
+            font-size: 0.7em;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+
+        .social-link:hover {
+            background: rgba(88, 166, 255, 0.2);
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #58a6ff, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(88, 166, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(88, 166, 255, 0.1);
+            color: #58a6ff;
+            border: 1px solid rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(88, 166, 255, 0.2);
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        /* Sections */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #58a6ff, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(45deg, #58a6ff, #8b5cf6);
+        }
+
+        /* About Section */
+        .about-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .profile-image {
+            width: 300px;
+            height: 350px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #58a6ff, #764ba2);
+            padding: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-placeholder {
+            width: calc(100% - 6px);
+            height: calc(100% - 6px);
+            border-radius: 17px;
+            background: rgba(10, 22, 40, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #58a6ff;
+        }
+
+        .about-text {
+            color: #8892b0;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(88, 166, 255, 0.05);
+            border: 1px solid rgba(88, 166, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #58a6ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: rgba(88, 166, 255, 0.05);
+            border: 1px solid rgba(88, 166, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(88, 166, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(88, 166, 255, 0.1);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: #8892b0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #58a6ff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .card-link:hover {
+            color: white;
+        }
+
+        /* Publications Section */
+        .publication-item {
+            background: rgba(88, 166, 255, 0.05);
+            border: 1px solid rgba(88, 166, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .publication-item:hover {
+            border-color: rgba(88, 166, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .publication-title {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .publication-details {
+            color: #8892b0;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .publication-doi {
+            color: #58a6ff;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+
+        .publication-doi:hover {
+            text-decoration: underline;
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .contact-info h3 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info p {
+            color: #8892b0;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            color: #8892b0;
+        }
+
+        .contact-form {
+            background: rgba(88, 166, 255, 0.05);
+            border: 1px solid rgba(88, 166, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(10, 22, 40, 0.5);
+            border: 1px solid rgba(88, 166, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        .hero > * {
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+        }
+
+        .subtitle { animation-delay: 0.1s; }
+        .main-title { animation-delay: 0.2s; }
+        .description { animation-delay: 0.3s; }
+        .social-links { animation-delay: 0.4s; }
+        .action-buttons { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Rain Background -->
+    <div class="rain">
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+    </div>
+    <div class="lightning"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">DUM</div>
+            <ul class="nav-links">
+                <li><a href="#home">About</a></li>
+                <li><a href="#blog">Blog</a></li>
+                <li><a href="#research">Research</a></li>
+                <li><a href="#publications">Publications</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="subtitle">Hydrologist & Civil Engineer</div>
+        <h1 class="main-title">Diego Urrea Méndez</h1>
+        <p class="description">
+            PhD Student in Civil Engineering | Extreme Events Researcher | 
+            Specialist in Multivariate Statistical Modeling and Compound Hydrological Events | 
+            Instituto de Hidráulica Ambiental - Universidad de Cantabria
+        </p>
+        
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/diego-urrea-mendez/" class="social-link" title="LinkedIn">in</a>
+            <a href="https://twitter.com/diegourreamend1" class="social-link" title="Twitter">𝕏</a>
+            <a href="https://www.researchgate.net/profile/Diego-Urrea-Mendez/research" class="social-link" title="ResearchGate">R<sup>G</sup></a>
+            <a href="https://github.com/diegourreamendez" class="social-link" title="GitHub"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+            <a href="https://orcid.org/0000-0001-6284-3087" class="social-link" title="ORCID">iD</a>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="#contact" class="btn btn-primary">🤝 Collaborate</a>
+            <a href="#research" class="btn btn-secondary">📊 View Research</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section" id="about">
+        <h2 class="section-title">About Me</h2>
+        <div class="about-content">
+            <div class="profile-image">
+                <div class="profile-placeholder">🌊</div>
+            </div>
+            <div>
+                <p class="about-text">
+                    I am a Civil Engineer graduated from the Escuela Colombiana de Ingeniería Julio Garavito, 
+                    and hold a Master's degree in Integrated Water Systems Management from the Universidad de Cantabria 
+                    (Spain, 2019-2020), where I received recognition as the student with the best academic record.
+                </p>
+                <p class="about-text">
+                    Since 2015, I have worked in hydraulics and hydrology consulting, taking on roles as a specialized 
+                    design engineer and project coordinator in the design of hydraulic infrastructure, sanitation systems, 
+                    wastewater treatment plants, road drainage, flood modeling, and vulnerability analysis.
+                </p>
+                <p class="about-text">
+                    Currently, I am developing my career as a predoctoral researcher at the Instituto de Hidráulica 
+                    Ambiental (IHCantabria) at the Universidad de Cantabria. My research focuses on critical areas 
+                    for multivariate and non-stationary hydrological risk management, contributing significantly 
+                    to resilience and preparedness for emerging hydrological challenges.
+                </p>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">9+</div>
+                <div class="stat-label">Years of Experience</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">15+</div>
+                <div class="stat-label">Scientific Publications</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">20+</div>
+                <div class="stat-label">Research Projects</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Research Section -->
+    <section class="section" id="research">
+        <h2 class="section-title">Research Areas</h2>
+        <div class="cards-grid">
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #8b5cf6); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">📊</span>
+                <h3>Multivariate Analysis</h3>
+                <p>Advanced statistical modeling using copulas and extreme value theory for analyzing dependencies between multiple hydrological variables.</p>
+                <a href="#" class="card-link">View Research →</a>
+            </div>
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #a855f7); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">🌊</span>
+                <h3>Compound Flood Risk Modeling</h3>
+                <p>Development of sophisticated models to assess compound flooding events considering multiple drivers and their interactions.</p>
+                <a href="#" class="card-link">View Projects →</a>
+            </div>
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #a855f7); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">📈</span>
+                <h3>Non-Stationary Time Series</h3>
+                <p>Analysis of non-stationary behavior in hydrological time series and its implications for climate change adaptation.</p>
+                <a href="#" class="card-link">View Data →</a>
+            </div>
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #a855f7); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">⏱️</span>
+                <h3>Multivariate Return Periods</h3>
+                <p>Innovative approaches to estimating return periods for multidimensional extreme events in hydrological systems.</p>
+                <a href="#" class="card-link">View Methods →</a>
+            </div>
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #a855f7); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">🎲</span>
+                <h3>Stochastic Generation Methods</h3>
+                <p>Application of advanced stochastic methods for generating synthetic hydrological series and uncertainty quantification.</p>
+                <a href="#" class="card-link">View Tools →</a>
+            </div>
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #a855f7); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">🚨</span>
+                <h3>Early Warning Systems</h3>
+                <p>Development of robust early warning systems for flood risk management using multivariate statistical approaches.</p>
+                <a href="#" class="card-link">View Systems →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Publications Section -->
+    <section class="section" id="publications">
+        <h2 class="section-title">Recent Publications</h2>
+        
+        <div class="publication-item">
+            <div class="publication-title">Inundación compuesta en el estuario de Santoña: umbrales bivariados y su aplicación en alertas tempranas</div>
+            <div class="publication-details">(2025) Ingeniería del Agua</div>
+            <a href="https://doi.org/10.4995/ia.2025.23025" class="publication-doi">DOI: 10.4995/ia.2025.23025</a>
+        </div>
+
+        <div class="publication-item">
+            <div class="publication-title">Advancing Flood Impact Estimation: Comparing Multivariate Continuous Hydrologic-Hydraulic Models with Traditional Approaches</div>
+            <div class="publication-details">(2025) EGU General Assembly</div>
+            <a href="https://doi.org/10.5194/egusphere-egu25-6833" class="publication-doi">DOI: 10.5194/egusphere-egu25-6833</a>
+        </div>
+
+        <div class="publication-item">
+            <div class="publication-title">Exploring Multivariate Return Periods: Enhancing Accuracy in Hydrological Analysis for Flood Prediction</div>
+            <div class="publication-details">(2025) EGU General Assembly</div>
+            <a href="https://doi.org/10.5194/egusphere-egu24-5685" class="publication-doi">DOI: 10.5194/egusphere-egu24-5685</a>
+        </div>
+
+        <div class="publication-item">
+            <div class="publication-title">Return period of high-dimensional compound events. Part I: Conceptual framework</div>
+            <div class="publication-details">(2024) Hydrology and Earth System Sciences</div>
+            <a href="https://doi.org/10.5194/hess-2024-334" class="publication-doi">DOI: 10.5194/hess-2024-334</a>
+        </div>
+
+        <div class="publication-item">
+            <div class="publication-title">Return period of high-dimensional compound events. Part II: Analysis of spatially-variable precipitation</div>
+            <div class="publication-details">(2024) Hydrology and Earth System Sciences</div>
+            <a href="https://doi.org/10.5194/hess-2024-335" class="publication-doi">DOI: 10.5194/hess-2024-335</a>
+        </div>
+
+        <div class="publication-item">
+            <div class="publication-title">Estimating extreme monthly rainfall for Spain using non-stationary techniques</div>
+            <div class="publication-details">(2023) Hydrological Sciences Journal</div>
+            <a href="https://doi.org/10.1080/02626667.2023.2193294" class="publication-doi">DOI: 10.1080/02626667.2023.2193294</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="https://www.researchgate.net/profile/Diego-Urrea-Mendez/research" class="btn btn-secondary">📚 View All Publications</a>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section class="section" id="projects">
+        <h2 class="section-title">Featured Projects</h2>
+        <div class="cards-grid">
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #8b5cf6); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">🏛️</span>
+                <h3>IHCantabria Research</h3>
+                <p>Leading research projects at the Instituto de Hidráulica Ambiental focusing on compound extreme events and multivariate risk assessment methodologies.</p>
+                <a href="#" class="card-link">📊 View Results</a>
+            </div>
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #8b5cf6); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">🌍</span>
+                <h3>Climate Risk Assessment</h3>
+                <p>Development of advanced statistical frameworks for climate risk assessment under non-stationary conditions with applications across multiple regions.</p>
+                <a href="#" class="card-link">🌡️ View Analysis</a>
+            </div>
+            <div class="card">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #58a6ff, #8b5cf6); border-radius: 20px 20px 0 0;"></div>
+                <span class="card-icon">💻</span>
+                <h3>Open Source Tools</h3>
+                <p>Contributing to open-source Python and R packages for hydrological analysis, multivariate statistics, and extreme value modeling.</p>
+                <a href="https://github.com/diegourreamendez" class="card-link">🐱 View Code</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section" id="contact">
+        <h2 class="section-title">Contact</h2>
+        <div class="contact-grid">
+            <div class="contact-info">
+                <h3>Let's Collaborate</h3>
+                <p>
+                    I'm always interested in collaborating on innovative research projects related to hydrology, 
+                    extreme events, and statistical modeling. Whether you need expertise in multivariate analysis, 
+                    compound flooding, or hydrological risk assessment, I'm open to new opportunities and challenges.
+                </p>
+                
+                <div class="contact-item">
+                    <span>🏛️</span>
+                    <span><strong>Institution:</strong> Instituto de Hidráulica Ambiental - Universidad de Cantabria</span>
+                </div>
+                <div class="contact-item">
+                    <span>📍</span>
+                    <span><strong>Location:</strong> Santander, Spain</span>
+                </div>
+                <div class="contact-item">
+                    <span>📞</span>
+                    <span><strong>Phone:</strong> +34 942 20 16 16 Ext. 56221</span>
+                </div>
+                <div class="contact-item">
+                    <span>📧</span>
+                    <span><strong>Email:</strong> dum834@alumnos.unican.es</span>
+                </div>
+                <div class="contact-item">
+                    <span>🔬</span>
+                    <span><strong>ORCID:</strong> 0000-0001-6284-3087</span>
+                </div>
+            </div>
+            
+            <div class="contact-form">
+                <h3 style="color: white; margin-bottom: 1.5rem;">Send me a message</h3>
+                <form>
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="institution">Institution</label>
+                        <input type="text" id="institution" name="institution" placeholder="University or organization">
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" placeholder="Research collaboration, consultation..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" placeholder="Tell me about your research project or collaboration idea..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        📧 Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: rgba(10, 22, 40, 0.8); border-top: 1px solid rgba(88, 166, 255, 0.1); padding: 3rem 0 1rem; margin-top: 4rem;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+            
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem; font-size: 1.1rem;">Diego Urrea Méndez</h4>
+                <p style="color: #8892b0; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem;">
+                    PhD Student & Researcher specializing in extreme hydrological events and multivariate statistical modeling 
+                    at Universidad de Cantabria, Spain.
+                </p>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="https://www.linkedin.com/in/diego-urrea-mendez/" class="social-link" style="width: 35px; height: 35px; font-size: 1rem;">in</a>
+                    <a href="https://github.com/diegourreamendez" class="social-link" style="width: 35px; height: 35px; font-size: 1rem;"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+                    <a href="https://www.researchgate.net/profile/Diego-Urrea-Mendez/research" class="social-link" style="width: 35px; height: 35px; font-size: 1rem;">R<sup>G</sup></a>
+                    <a href="https://orcid.org/0000-0001-6284-3087" class="social-link" style="width: 35px; height: 35px; font-size: 1rem;">iD</a>
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem; font-size: 1.1rem;">Research Areas</h4>
+                <ul style="list-style: none; color: #8892b0; font-size: 0.9rem;">
+                    <li style="margin-bottom: 0.5rem;"><a href="#research" style="color: #8892b0; text-decoration: none; transition: color 0.3s ease;">Multivariate Analysis</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#research" style="color: #8892b0; text-decoration: none; transition: color 0.3s ease;">Compound Flooding</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#research" style="color: #8892b0; text-decoration: none; transition: color 0.3s ease;">Non-Stationary Time Series</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#research" style="color: #8892b0; text-decoration: none; transition: color 0.3s ease;">Return Periods</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem; font-size: 1.1rem;">Quick Links</h4>
+                <ul style="list-style: none; color: #8892b0; font-size: 0.9rem;">
+                    <li style="margin-bottom: 0.5rem;"><a href="#publications" style="color: #8892b0; text-decoration: none; transition: color 0.3s ease;">Publications</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#projects" style="color: #8892b0; text-decoration: none; transition: color 0.3s ease;">Projects</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="mailto:dum834@alumnos.unican.es" style="color: #8892b0; text-decoration: none; transition: color 0.3s ease;">Email</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="tel:+34942201616" style="color: #8892b0; text-decoration: none; transition: color 0.3s ease;">Phone</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding-top: 2rem; border-top: 1px solid rgba(88, 166, 255, 0.1); color: #8892b0; font-size: 0.9rem; margin-top: 2rem;">
+            <p>&copy; 2025 Diego Urrea Méndez. All rights reserved. | PhD Student at Universidad de Cantabria</p>
+        </div>
+    </footer>
+
+    <script>
+        // Form submission handling
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const subject = formData.get('subject');
+            const message = formData.get('message');
+            
+            if (!name || !email || !subject || !message) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '⏳ Sending...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                alert(`Thank you ${name}! Your message has been sent. I'll get back to you soon to discuss potential research collaborations.`);
+                this.reset();
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Active navigation highlight
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-links a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.style.color = '#8892b0';
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.style.color = '#58a6ff';
+                }
+            });
+        });
+
+        // Add hover effects to cards and publications
+        document.querySelectorAll('.card, .publication-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = this.classList.contains('card') ? 'translateY(-5px)' : 'translateX(5px)';
+                this.style.borderColor = 'rgba(88, 166, 255, 0.3)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = this.classList.contains('card') ? 'translateY(0)' : 'translateX(0)';
+                this.style.borderColor = 'rgba(88, 166, 255, 0.1)';
+            });
+        });
+
+        // Footer link hover effects
+        document.querySelectorAll('footer a').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('social-link')) {
+                    this.style.color = '#58a6ff';
+                }
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('social-link')) {
+                    this.style.color = '#8892b0';
+                }
+            });
+        });
+
+        // Typing effect for hero title (simple version)
+        const title = document.querySelector('.main-title');
+        const originalText = title.textContent;
+        title.textContent = '';
+        
+        let i = 0;
+        function typeWriter() {
+            if (i < originalText.length) {
+                title.textContent += originalText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+        
+        // Start typing effect after hero animation
+        setTimeout(typeWriter, 1000);
+    </script>
+</body>
+</html>
