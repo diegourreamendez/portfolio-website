@@ -68,6 +68,7 @@
             font-size: 1.8rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-decoration: none;
@@ -83,11 +84,27 @@
         .nav-links a:hover { color: var(--primary); }
 
         .post-hero {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 12rem 2rem 6rem;
             text-align: center;
-            background: linear-gradient(rgba(10, 22, 40, 0.7), rgba(10, 22, 40, 0.9)), url('images/extreme-rainfall-spain.png');
+            background: linear-gradient(rgba(10, 22, 40, 0.3), rgba(10, 22, 40, 0.6)), url('images/extreme-rainfall-spain.png');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
+        }
+
+        .hero-glass {
+            background: rgba(10, 22, 40, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            padding: 4rem;
+            border-radius: 32px;
+            max-width: 900px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
         .post-container {
@@ -166,9 +183,11 @@
     </nav>
 
     <header class="post-hero">
-        <span class="badge">Environmental Modeling</span>
-        <h1>The End of Stationarity: Predicting Extreme Rainfall in Spain</h1>
-        <p style="color: var(--text-dim);">Research Insight | By Diego Urrea Méndez</p>
+        <div class="hero-glass">
+            <span class="badge">Environmental Modeling</span>
+            <h1>The End of Stationarity: Predicting Extreme Rainfall in Spain</h1>
+            <p style="color: var(--text-dim);">Research Insight | By Diego Urrea Méndez</p>
+        </div>
     </header>
 
     <main class="post-container">
@@ -191,6 +210,11 @@
             <p>Access the original research paper on Taylor & Francis for the complete methodology and results.</p>
             <a href="https://doi.org/10.1080/02626667.2023.2193294" class="btn">Read the Full Paper</a>
         </div>
+
+        <figure style="margin: 4rem 0;">
+            <img src="images/extreme-rainfall-spain.png" alt="Extreme Rainfall Prediction Visualization" style="width: 100%; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); border: 1px solid var(--border);">
+            <figcaption style="color: var(--text-dim); text-align: center; margin-top: 1rem; font-size: 0.9rem;">Advanced statistical visualization: Non-stationary rainfall analysis for Spain.</figcaption>
+        </figure>
 
         <h2>Why Stationary Models are Failing</h2>
         <p>
