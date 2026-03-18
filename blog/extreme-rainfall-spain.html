@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Predicting extreme rainfall in Spain using non-stationary models. Learn how climate variability is reshaping flood risk assessments and why autoregressive models outperform traditional methods.">
+    <meta name="keywords" content="Extreme rainfall Spain, Non-stationary hydrology, Autoregressive rainfall modeling, Climate change flood risk, Hydrological risk Spain">
+    <meta name="author" content="Diego Urrea Méndez">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://diegourreamendez.github.io/blog/extreme-rainfall-spain.html">
+    <meta property="og:title" content="The End of Stationarity: Revolutionizing Extreme Rainfall Prediction in Spain">
+    <meta property="og:description" content="Why traditional flood models are failing and how new non-stationary techniques provide more accurate predictive probabilities for extreme events.">
+    <meta property="og:image" content="https://diegourreamendez.github.io/blog/images/extreme-rainfall-spain.png">
+
+    <title>Extreme Rainfall in Spain: Non-Stationary Techniques | Diego Urrea Méndez</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #58a6ff;
+            --secondary: #8b5cf6;
+            --bg-dark: #0a1628;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border: rgba(88, 166, 255, 0.2);
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .logo { font-family: 'Outfit', sans-serif; }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 0;
+            background: rgba(10, 22, 40, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-links a:hover { color: var(--primary); }
+
+        .post-hero {
+            padding: 12rem 2rem 6rem;
+            text-align: center;
+            background: linear-gradient(rgba(10, 22, 40, 0.7), rgba(10, 22, 40, 0.9)), url('images/extreme-rainfall-spain.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .post-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 5rem 2rem 10rem;
+        }
+
+        .post-meta {
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        h1 { font-size: 3.5rem; margin-bottom: 2rem; color: white; line-height: 1.2; }
+        h2 { font-size: 2rem; margin: 4rem 0 1.5rem; color: var(--primary); }
+        p { margin-bottom: 2rem; font-size: 1.15rem; color: var(--text-main); opacity: 0.9; }
+
+        .cta-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 3rem;
+            border-radius: 24px;
+            margin: 4rem 0;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover { transform: translateY(-5px); }
+
+        footer {
+            padding: 6rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+
+        .badge {
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">DUM</a>
+            <ul class="nav-links">
+                <li><a href="../index.html#about">About</a></li>
+                <li><a href="../index.html#research">Research</a></li>
+                <li><a href="../index.html#publications">Publications</a></li>
+                <li><a href="../tutorials.html">Tutorials</a></li>
+                <li><a href="../blog.html">Blog</a></li>
+                <li><a href="../index.html#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="post-hero">
+        <span class="badge">Environmental Modeling</span>
+        <h1>The End of Stationarity: Predicting Extreme Rainfall in Spain</h1>
+        <p style="color: var(--text-dim);">Research Insight | By Diego Urrea Méndez</p>
+    </header>
+
+    <main class="post-container">
+        <span class="post-meta">MARCH 18, 2026</span>
+        
+        <p>
+            For decades, the standard approach to flood risk management relied on a single, core assumption: <strong>stationarity</strong>. 
+            The idea was simple—the past is a reliable guide to the future. If we know the biggest storm of the last 50 years, 
+            we can design infrastructure for the next 50.
+        </p>
+
+        <p>
+            However, in a world shaped by climate variability, this assumption is no longer valid. In my recent research 
+            published in the <em>Hydrological Sciences Journal</em>, we explored how non-stationary techniques are 
+            becoming essential for predicting extreme monthly rainfall in Spain.
+        </p>
+
+        <div class="cta-box">
+            <h3>Want the full scientific breakdown?</h3>
+            <p>Access the original research paper on Taylor & Francis for the complete methodology and results.</p>
+            <a href="https://doi.org/10.1080/02626667.2023.2193294" class="btn">Read the Full Paper</a>
+        </div>
+
+        <h2>Why Stationary Models are Failing</h2>
+        <p>
+            Traditional extreme value analysis (like the GEV distribution) often assumes that yearly maxima are independent 
+            and identically distributed. But when we look at sub-yearly data—like monthly rainfall—the maxima from different 
+            months are not interchangeable. Seasonality, global climate patterns (like ENSO), and long-term trends 
+            all play a role.
+        </p>
+
+        <h2>The Autoregressive Revolution</h2>
+        <p>
+            Our study compared two distinct approaches: a direct parametric method and an approach based on <strong>autoregressive time series models</strong>. 
+            The results were clear: autoregressive models provided a significantly more accurate representation of extreme events. 
+            By accounting for dependencies and temporal variations, these models showed a much lower Akaike Information Criterion (AIC), 
+            meaning they offer a better fit with lower complexity.
+        </p>
+
+        <h2>Impact for Flood Risk Policy</h2>
+        <p>
+            This isn't just a mathematical exercise. Improved predictive capability means we can better assess the probability 
+            of future extreme events. For a country like Spain, where hydrological risks vary significantly by region and month, 
+            using non-stationary tools isn't just better science—it's a necessity for resilient urban planning and civil engineering.
+        </p>
+
+        <p>
+            The predictive probability of extreme events is shifting. Our research provides a comprehensive framework to 
+            characterize these changes, ensuring that we design for the climate of tomorrow, not the climate of yesterday.
+        </p>
+
+        <div class="cta-box">
+            <h3>Cite this research</h3>
+            <p>Urrea Méndez, D., & del Jesus, M. (2023). Estimating extreme monthly rainfall for Spain using non-stationary techniques. <em>Hydrological Sciences Journal</em>.</p>
+            <a href="https://doi.org/10.1080/02626667.2023.2193294" class="btn">View on Taylor & Francis</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Diego Urrea Méndez. All rights reserved.</p>
+    </footer>
+</body>
+</html>

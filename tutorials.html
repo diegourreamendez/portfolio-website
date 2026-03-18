@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Diego Urrea Méndez - Hydrology & Data Science Blog. Insights on multivariate statistics, compound flood risk, and more.">
-    <title>Blog | Diego Urrea Méndez</title>
+    <meta name="description" content="Diego Urrea Méndez - Hydrology & Data Science Tutorials. Step-by-step guides on statistical modeling, R, Python, and more.">
+    <title>Tutorials | Diego Urrea Méndez</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,54 +72,68 @@
         }
         .nav-links a:hover { color: var(--primary); }
 
-        .blog-header {
+        .header {
             padding: 10rem 2rem 5rem;
             text-align: center;
             background: radial-gradient(circle at center, rgba(88, 166, 255, 0.05) 0%, transparent 70%);
         }
 
-        .blog-container {
-            max-width: 900px;
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem 10rem;
         }
 
-        .blog-post {
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 24px;
-            padding: 3rem;
-            margin-bottom: 3rem;
+            padding: 2.5rem;
             transition: all 0.3s ease;
-            text-decoration: none;
-            color: inherit;
-            display: block;
+            position: relative;
+            overflow: hidden;
         }
 
-        .blog-post:hover {
-            transform: translateY(-5px);
+        .card:hover {
+            transform: translateY(-10px);
             border-color: var(--primary);
         }
 
-        .post-date {
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(88, 166, 255, 0.1);
             color: var(--primary);
+            border-radius: 8px;
+            font-size: 0.8rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        .post-title {
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
             color: white;
         }
 
-        .post-excerpt {
+        .card p {
             color: var(--text-dim);
-            font-size: 1.1rem;
-            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .btn-small {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         footer {
@@ -138,38 +152,44 @@
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#research">Research</a></li>
                 <li><a href="index.html#publications">Publications</a></li>
-                <li><a href="tutorials.html">Tutorials</a></li>
-                <li><a href="blog.html" style="color: var(--primary);">Blog</a></li>
+                <li><a href="tutorials.html" style="color: var(--primary);">Tutorials</a></li>
+                <li><a href="blog.html">Blog</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
             </ul>
         </div>
     </nav>
 
-    <header class="blog-header">
-        <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Research Insights</h1>
-        <p style="color: var(--text-dim); font-size: 1.2rem;">Exploring the frontiers of Hydrology & Data Science</p>
+    <header class="header">
+        <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Tutorials</h1>
+        <p style="color: var(--text-dim); font-size: 1.2rem;">Practical guides for water science and data analysis</p>
     </header>
 
-    <main class="blog-container">
-        <a href="blog/extreme-rainfall-spain.html" style="text-decoration: none; color: inherit; display: block;">
-            <article class="blog-post">
-                <div class="post-date">March 18, 2026</div>
-                <h2 class="post-title">The End of Stationarity: Revolutionizing Extreme Rainfall Prediction in Spain</h2>
-                <p class="post-excerpt">
-                    Why traditional flood models are failing in a changing climate and how new non-stationary 
-                    techniques provide more accurate predictions for extreme events.
-                </p>
-            </article>
-        </a>
+    <main class="container">
+        <div class="grid">
+            <div class="card">
+                <span class="tag">R Programming</span>
+                <h3>Multivariate Copula Modeling</h3>
+                <p>A step-by-step guide to implementing Archimedean copulas for hydrological risk assessment using the 'copula' package.</p>
+                <div class="post-date" style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1rem;">Coming Soon</div>
+                <a href="#" class="btn-small">Read Tutorial →</a>
+            </div>
 
-        <article class="blog-post">
-            <div class="post-date">Coming Soon</div>
-            <h2 class="post-title">The Role of Copulas in Hydrological Risk Analysis</h2>
-            <p class="post-excerpt">
-                Why univariate analysis isn't enough for extreme events. We'll explore the mathematical foundations 
-                of dependency modeling in hydrology.
-            </p>
-        </article>
+            <div class="card">
+                <span class="tag">Python</span>
+                <h3>Extreme Value Theory with PyEVT</h3>
+                <p>How to fit GEV distributions to extreme rainfall series and calculate return periods with uncertainty quantification.</p>
+                <div class="post-date" style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1rem;">Coming Soon</div>
+                <a href="#" class="btn-small">Read Tutorial →</a>
+            </div>
+
+            <div class="card">
+                <span class="tag">GIS</span>
+                <h3>Flood Mapping with QGIS & HEC-RAS</h3>
+                <p>Visualizing 2D flood simulations and creating professional maps for risk management reports.</p>
+                <div class="post-date" style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1rem;">Coming Soon</div>
+                <a href="#" class="btn-small">Read Tutorial →</a>
+            </div>
+        </div>
     </main>
 
     <footer>
