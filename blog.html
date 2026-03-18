@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Diego Urrea Méndez - Hydrology & Data Science Blog. Insights on multivariate statistics, compound flood risk, and more.">
+    <title>Blog | Diego Urrea Méndez</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #58a6ff;
+            --secondary: #8b5cf6;
+            --bg-dark: #0a1628;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border: rgba(88, 166, 255, 0.2);
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .logo { font-family: 'Outfit', sans-serif; }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 0;
+            background: rgba(10, 22, 40, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-links a:hover { color: var(--primary); }
+
+        .blog-header {
+            padding: 10rem 2rem 5rem;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(88, 166, 255, 0.05) 0%, transparent 70%);
+        }
+
+        .blog-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem 10rem;
+        }
+
+        .blog-post {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .blog-post:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .post-date {
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .post-excerpt {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        footer {
+            padding: 6rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">DUM</a>
+            <ul class="nav-links">
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#research">Research</a></li>
+                <li><a href="index.html#publications">Publications</a></li>
+                <li><a href="blog.html" style="color: var(--primary);">Blog</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="blog-header">
+        <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Research Insights</h1>
+        <p style="color: var(--text-dim); font-size: 1.2rem;">Exploring the frontiers of Hydrology & Data Science</p>
+    </header>
+
+    <main class="blog-container">
+        <article class="blog-post">
+            <div class="post-date">Coming Soon</div>
+            <h2 class="post-title">Understanding Compound Flooding in Estuarine Environments</h2>
+            <p class="post-excerpt">
+                A deep dive into the interactions between river flow and sea level rise. Stay tuned for the full article 
+                on how multivariate statistical modeling can improve early warning systems.
+            </p>
+        </article>
+
+        <article class="blog-post">
+            <div class="post-date">Coming Soon</div>
+            <h2 class="post-title">The Role of Copulas in Hydrological Risk Analysis</h2>
+            <p class="post-excerpt">
+                Why univariate analysis isn't enough for extreme events. We'll explore the mathematical foundations 
+                of dependency modeling in hydrology.
+            </p>
+        </article>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Diego Urrea Méndez. All rights reserved.</p>
+    </footer>
+</body>
+</html>
