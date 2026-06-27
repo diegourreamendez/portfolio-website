@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scientific Tutorials | DUM Research</title>
+<meta name="description" content="Practical Python tutorials on multivariate copula modelling, extreme value theory with pyextremes, and scientific data visualisation for hydrological research."/>
+<meta name="robots" content="index, follow"/>
+<meta name="author" content="Diego Urrea Méndez"/>
+<meta name="theme-color" content="#0a1628"/>
+<link rel="canonical" href="https://diegourrea.com/tutorials/"/>
+<meta property="og:site_name" content="DUM Research"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Scientific Tutorials | DUM Research"/>
+<meta property="og:description" content="Practical Python tutorials on multivariate copula modelling, extreme value theory with pyextremes, and scientific data visualisation for hydrological research."/>
+<meta property="og:url" content="https://diegourrea.com/tutorials/"/>
+<meta property="og:image" content="https://diegourrea.com/assets/og-cover.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Scientific Tutorials | DUM Research"/>
+<meta name="twitter:description" content="Python tutorials on copula modelling, extreme value theory, and scientific data visualisation."/>
+<meta name="twitter:image" content="https://diegourrea.com/assets/og-cover.jpg"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q1CH7H6RBZ"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-Q1CH7H6RBZ');</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-container": "#002b24",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "on-primary": "#00201b",
+                        "surface-container-low": "#0e1e36",
+                        "surface-dim": "#0a1628",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-surface-variant": "#bbc9cd",
+                        "surface-container-high": "#1f2f4d",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "on-primary-fixed-variant": "#004d40",
+                        "primary-container": "#58a6ff",
+                        "on-secondary": "#3c0091",
+                        "error": "#ffb4ab",
+                        "background": "#0a1628",
+                        "surface-bright": "#2e394d",
+                        "surface-container-highest": "#2a3548",
+                        "outline-variant": "#3c494c",
+                        "tertiary": "#ffd6a3",
+                        "primary-fixed": "#99f6e4",
+                        "secondary-container": "#571bc1",
+                        "on-error": "#690005",
+                        "inverse-primary": "#006877",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "surface-container-lowest": "#050d18",
+                        "on-surface": "#d7e3fc",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb957",
+                        "on-tertiary": "#462b00",
+                        "secondary-fixed": "#e9ddff",
+                        "primary-fixed-dim": "#58a6ff",
+                        "tertiary-fixed": "#ffddb5",
+                        "outline": "#859397",
+                        "surface-tint": "#58a6ff",
+                        "inverse-surface": "#d7e3fc",
+                        "tertiary-container": "#ffb13b",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#14253e",
+                        "surface": "#0a1628",
+                        "on-secondary-container": "#c4abff",
+                        "inverse-on-surface": "#253144",
+                        "surface-variant": "#2a3548",
+                        "on-primary-fixed": "#00120f",
+                        "primary": "#58a6ff",
+                        "on-secondary-fixed": "#23005c",
+                        "secondary": "#8b5cf6",
+                        "on-background": "#d7e3fc",
+                        "on-tertiary-container": "#6e4600"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+    .grid-bg {
+      background-size: 40px 40px;
+      background-image: linear-gradient(to right, rgba(133, 147, 151, 0.05) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(133, 147, 151, 0.05) 1px, transparent 1px);
+    }
+    .glass-card {
+      background: rgba(20, 32, 50, 0.6);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(138, 235, 255, 0.2);
+    }
+    .reveal-element {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: transform, opacity;
+    }
+    .reveal-element.revealed {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .reveal-delayed-1 { transition-delay: 100ms; }
+    .reveal-delayed-2 { transition-delay: 200ms; }
+    .reveal-delayed-3 { transition-delay: 300ms; }
+    .reveal-delayed-4 { transition-delay: 400ms; }
+  </style>
+</head>
+<body class="bg-[#0a1628] text-on-surface font-body selection:bg-primary/30">
+<canvas id="fluid-canvas" class="fixed top-0 left-0 w-full h-full z-[1] pointer-events-none"></canvas>
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0a1628]/80 backdrop-blur-md border-b border-blue-500/10 shadow-[0_0_20px_rgba(88,235,255,0.08)]">
+<div class="flex justify-between items-center px-8 h-16 max-w-7xl mx-auto">
+<a href="../index.html" class="text-xl font-bold tracking-tighter text-blue-400 font-headline">DUM</a>
+<div class="hidden md:flex gap-8 font-label tracking-tight text-sm uppercase">
+<a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../about/index.html">About</a>
+<a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../index.html">Research</a>
+<a class="text-cyan-400 border-b-2 border-cyan-400 pb-1" href="./index.html">Tutorials</a>
+<a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../articles/extreme-rainfall/index.html">Blog</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-5 py-2 font-label text-xs uppercase tracking-widest font-bold rounded-sm hover:opacity-90 transition-opacity hidden sm:block">
+                Contact
+            </button>
+<button id="mobile-menu-btn" class="md:hidden p-2 text-cyan-400 hover:bg-cyan-950/30 transition-all rounded-lg">
+    <span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden absolute top-16 left-0 w-full bg-[#071325]/95 backdrop-blur-md border-b border-cyan-500/10 flex flex-col p-6 gap-4 font-label tracking-tight text-sm uppercase md:hidden z-50">
+    <a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../about/index.html">About</a>
+    <a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../index.html">Research</a>
+    <a class="text-cyan-400" href="./index.html">Tutorials</a>
+    <a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../articles/extreme-rainfall/index.html">Blog</a>
+</div>
+</nav>
+<main class="relative z-10 pt-16 min-h-screen grid-bg">
+<div class="max-w-7xl mx-auto px-8 py-12 lg:py-24 space-y-24">
+<header class="reveal-element">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-primary/10 border border-primary/20 mb-6">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono text-[10px] uppercase tracking-widest text-primary">Status: Knowledge Repository Active</span>
+</div>
+<h1 class="text-5xl md:text-7xl font-headline font-bold tracking-tighter text-on-surface mb-6">
+        Scientific <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Tutorials</span>
+</h1>
+<p class="text-xl text-on-surface-variant max-w-2xl font-light leading-relaxed">
+        Practical guides for water science, computational hydrology, and advanced climate data analysis workflows.
+      </p>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div class="glass-card p-8 group relative flex flex-col h-full hover:shadow-[0_0_30px_rgba(138,235,255,0.1)] transition-all duration-500 reveal-element">
+<div class="flex justify-between items-start mb-12">
+<span class="font-mono text-[10px] text-primary tracking-widest uppercase bg-primary/10 px-2 py-1">Python</span>
+<div class="bg-primary/10 px-3 py-1 rounded-full flex items-center gap-1.5 border border-primary/30">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono text-[10px] text-primary uppercase">Active</span>
+</div>
+</div>
+<h3 class="text-2xl font-headline font-semibold mb-4 text-on-surface group-hover:text-primary transition-colors">Multivariate Copula Modeling</h3>
+<p class="text-base text-slate-400 font-light leading-relaxed mb-8 flex-grow">
+          Implementation of Archimedean copulas for robust hydrological risk assessment and joint probability analysis.
+        </p>
+<div class="flex flex-col gap-3 mb-6">
+  <a href="./copula-conceptual/index.html" class="flex items-center justify-between p-3 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-sm font-mono text-primary group/link transition-all">
+    <span>01 // Conceptual Guide</span>
+    <span class="material-symbols-outlined text-sm group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+  </a>
+  <a href="./copula-notebook/index.html" class="flex items-center justify-between p-3 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-sm font-mono text-secondary group/link transition-all">
+    <span>02 // Step-by-Step Jupyter</span>
+    <span class="material-symbols-outlined text-sm group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+  </a>
+</div>
+<div class="mt-auto pt-6 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-outline text-lg">database</span>
+<span class="material-symbols-outlined text-outline text-lg">analytics</span>
+</div>
+</div>
+</div>
+<div class="glass-card p-8 group relative flex flex-col h-full hover:shadow-[0_0_30px_rgba(138,235,255,0.1)] transition-all duration-500 reveal-element">
+<div class="flex justify-between items-start mb-12">
+<span class="font-mono text-[10px] text-secondary tracking-widest uppercase bg-secondary/10 px-2 py-1">Python</span>
+<div class="bg-primary/10 px-3 py-1 rounded-full flex items-center gap-1.5 border border-primary/30">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono text-[10px] text-primary uppercase">Active</span>
+</div>
+</div>
+<h3 class="text-2xl font-headline font-semibold mb-4 text-on-surface group-hover:text-primary transition-colors">Extreme Value Theory with pyextremes</h3>
+<p class="text-base text-slate-400 font-light leading-relaxed mb-8 flex-grow">
+          GEV distributions, peak-over-threshold analysis, return level estimation, and non-stationary extensions for hydrological extremes.
+        </p>
+<div class="flex flex-col gap-3 mb-6">
+  <a href="./evt-pyevt/index.html" class="flex items-center justify-between p-3 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-sm font-mono text-primary group/link transition-all">
+    <span>01 // Practical Guide</span>
+    <span class="material-symbols-outlined text-sm group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+  </a>
+</div>
+<div class="mt-auto pt-6 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-outline text-lg">code</span>
+<span class="material-symbols-outlined text-outline text-lg">show_chart</span>
+</div>
+</div>
+</div>
+<div class="glass-card p-8 group relative flex flex-col h-full hover:shadow-[0_0_30px_rgba(138,235,255,0.1)] transition-all duration-500 reveal-element">
+<div class="flex justify-between items-start mb-12">
+<span class="font-mono text-[10px] text-secondary tracking-widest uppercase bg-secondary/10 px-2 py-1">Python</span>
+<div class="bg-primary/10 px-3 py-1 rounded-full flex items-center gap-1.5 border border-primary/30">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono text-[10px] text-primary uppercase">Active</span>
+</div>
+</div>
+<h3 class="text-2xl font-headline font-semibold mb-4 text-on-surface group-hover:text-primary transition-colors">Scientific Data Visualization</h3>
+<p class="text-base text-slate-400 font-light leading-relaxed mb-8 flex-grow">
+  Publication-quality figures for hydrological data: matplotlib, cartopy for geospatial plots, and interactive dashboards with plotly.
+</p>
+<div class="flex flex-col gap-3 mb-6">
+  <a href="./data-visualization/index.html" class="flex items-center justify-between p-3 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-sm font-mono text-primary group/link transition-all">
+    <span>01 // Practical Guide</span>
+    <span class="material-symbols-outlined text-sm group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+  </a>
+</div>
+<div class="mt-auto pt-6 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-outline text-lg">bar_chart</span>
+<span class="material-symbols-outlined text-outline text-lg">public</span>
+</div>
+</div>
+</div>
+<div class="glass-card p-8 group relative flex flex-col h-full hover:shadow-[0_0_30px_rgba(138,235,255,0.1)] transition-all duration-500 reveal-element">
+<div class="flex justify-between items-start mb-12">
+<span class="font-mono text-[10px] text-secondary tracking-widest uppercase bg-secondary/10 px-2 py-1">GIS</span>
+<div class="bg-surface-container-highest px-3 py-1 rounded-full flex items-center gap-1.5 border border-outline-variant/30">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="font-mono text-[10px] text-tertiary uppercase">Coming Soon</span>
+</div>
+</div>
+<h3 class="text-2xl font-headline font-semibold mb-4 text-on-surface group-hover:text-primary transition-colors">Flood Mapping with QGIS &amp; HEC-RAS</h3>
+<p class="text-base text-slate-400 font-light leading-relaxed mb-8 flex-grow">
+          Workflow for 2D flood simulations, terrain processing, and high-fidelity visualization of inundation zones.
+        </p>
+<div class="mt-auto pt-6 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-outline text-lg">map</span>
+<span class="material-symbols-outlined text-outline text-lg">water_drop</span>
+</div>
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary transition-all group-hover:translate-x-1">arrow_forward</span>
+</div>
+</div>
+</div>
+<section class="mt-24 p-12 glass-card rounded-xl overflow-hidden relative reveal-element">
+<div class="absolute top-0 right-0 p-4 font-mono text-[8px] opacity-20 text-primary uppercase vertical-lr tracking-[0.5em]">
+        SYSTEM_DIAGNOSTIC // 0x44F2
+      </div>
+<div class="flex flex-col md:flex-row gap-12 items-center">
+<div class="md:w-1/2">
+<h2 class="text-3xl font-headline font-bold mb-6 text-primary">Join the Beta Community</h2>
+<p class="text-on-surface-variant mb-8 leading-relaxed">
+            Interested in early access to my codebase and datasets? I'm currently finalizing the documentation for these modules. Leave your email to receive technical updates and repository access.
+          </p>
+<div class="flex flex-col sm:flex-row gap-3">
+<input class="bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface font-mono text-sm px-4 py-3 flex-grow" placeholder="researcher@institution.edu" type="email"/>
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary font-headline font-bold px-8 py-3 rounded-sm transition-transform active:scale-95 shadow-[0_0_15px_rgba(138,235,255,0.2)]">
+              SUBSCRIBE
+            </button>
+</div>
+</div>
+<div class="md:w-1/2 w-full h-64 bg-surface-container-low rounded border border-outline-variant/20 relative overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 opacity-10 grid-bg"></div>
+<div class="z-10 text-center">
+<span class="material-symbols-outlined text-5xl text-primary/20 mb-4" data-weight="fill">model_training</span>
+<p class="font-mono text-[10px] tracking-widest text-primary/40 uppercase">Interactive Lab Coming Soon</p>
+</div>
+<img alt="Climate Visualization" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay" data-alt="Abstract visualization of fluid dynamics with glowing blue lines and particles on a dark background representing water flow data" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1zPSwPbCYiT4zrldJMQPzyq0wHc5CKoDjuxmWSxniaITQ8j4mN1n9uQD51xiUgksmzI0L_3gu3ZAaVkatzJiFIO2dGcsfiEVSCoYZFsRdAMhbM3czJHv83E9sZFnqKBcNNhNGClL6LJ-EbSM-zU_LwjeleSVVGuugQAqr5PjACwTKt5tCGPV3h1Reef2Z_2WQLRKTj_juC4t5SptSWjPH5e9BgW_RD-8pYWSFga1vktdGjjNXhfN2GFyPlRlXo_JrIFOzQbPwhoc"/>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 border-t border-slate-800/50 bg-[#030e20]/80 backdrop-blur-md relative z-10">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-4">
+<div class="text-lg font-bold text-cyan-400 font-headline">DUM</div>
+<div class="font-mono text-xs uppercase tracking-widest text-slate-500 text-center md:text-left">
+        © 2024 Diego Urrea Méndez • DUM Research
+      </div>
+<div class="flex gap-8">
+<a class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.2em] text-slate-500 hover:text-cyan-300 hover:glow-sm underline-offset-4 hover:underline transition-all" href="https://github.com">GitHub</a>
+<a class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.2em] text-slate-500 hover:text-cyan-300 hover:glow-sm underline-offset-4 hover:underline transition-all" href="#">Google Scholar</a>
+<a class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.2em] text-slate-500 hover:text-cyan-300 hover:glow-sm underline-offset-4 hover:underline transition-all" href="#">ResearchGate</a>
+<a class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.2em] text-slate-500 hover:text-cyan-300 hover:glow-sm underline-offset-4 hover:underline transition-all" href="#">ORCID</a>
+</div>
+</div>
+</footer>
+<script>
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+        document.getElementById('mobile-menu')?.classList.toggle('hidden');
+    });
+
+    // Constellation background particles system
+    const canvas = document.getElementById('fluid-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        
+        let particles = [];
+        const maxParticles = 80;
+        const connectionDist = 120;
+        const mouse = { x: null, y: null, radius: 180 };
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.6;
+                this.vy = (Math.random() - 0.5) * 0.6;
+                this.radius = Math.random() * 2 + 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+                
+                // Mouse interaction: gentle pull
+                if (mouse.x !== null) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        const force = (mouse.radius - dist) / mouse.radius;
+                        this.x -= dx * force * 0.03;
+                        this.y -= dy * force * 0.03;
+                    }
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(88, 166, 255, 0.4)';
+                ctx.fill();
+            }
+        }
+        
+        function init() {
+            particles = [];
+            for (let i = 0; i < maxParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            init();
+        });
+        
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+        
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                // Connect to other particles
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < connectionDist) {
+                        const alpha = (connectionDist - dist) / connectionDist * 0.15;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(88, 166, 255, ${alpha})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+                
+                // Connect to mouse
+                if (mouse.x !== null) {
+                    const dx = particles[i].x - mouse.x;
+                    const dy = particles[i].y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        const alpha = (mouse.radius - dist) / mouse.radius * 0.25;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        init();
+        animate();
+    }
+
+    // Scroll Reveal Observer
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.05
+    };
+    
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.reveal-element').forEach(el => {
+        revealObserver.observe(el);
+    });
+</script>
+</body></html>

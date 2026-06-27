@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scientific Data Visualization in Python | DUM Research</title>
+<meta name="description" content="Publication-quality hydrological figures with matplotlib, interactive Plotly dashboards, and spatial station maps with Cartopy — illustrated with real datasets."/>
+<meta name="robots" content="index, follow"/>
+<meta name="author" content="Diego Urrea Méndez"/>
+<meta name="theme-color" content="#0a1628"/>
+<link rel="canonical" href="https://diegourrea.com/tutorials/data-visualization/"/>
+<meta property="og:site_name" content="DUM Research"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:type" content="article"/>
+<meta property="og:title" content="Scientific Data Visualization in Python | DUM Research"/>
+<meta property="og:description" content="Publication-quality hydrological figures with matplotlib, interactive Plotly dashboards, and spatial maps with Cartopy."/>
+<meta property="og:url" content="https://diegourrea.com/tutorials/data-visualization/"/>
+<meta property="og:image" content="https://diegourrea.com/assets/og-cover.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Scientific Data Visualization in Python | DUM Research"/>
+<meta name="twitter:description" content="matplotlib, Plotly, and Cartopy for publication-quality hydrological figures."/>
+<meta name="twitter:image" content="https://diegourrea.com/assets/og-cover.jpg"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q1CH7H6RBZ"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-Q1CH7H6RBZ');</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"LearningResource","name":"Scientific Data Visualization in Python","author":{"@type":"Person","name":"Diego Urrea Méndez","url":"https://diegourrea.com/"},"url":"https://diegourrea.com/tutorials/data-visualization/","description":"matplotlib, Plotly, and Cartopy for publication-quality hydrological and geospatial figures.","educationalLevel":"Graduate","teaches":"matplotlib, Plotly, Cartopy, scientific visualisation, geospatial maps"}
+</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#071325", "on-surface": "#d7e3fc", "primary": "#58a6ff",
+        "secondary": "#8b5cf6", "tertiary": "#ffd6a3", "tertiary-fixed-dim": "#ffb957",
+        "background": "#071325", "on-background": "#d7e3fc",
+        "surface-container-lowest": "#030e20", "surface-container-low": "#101c2e",
+        "surface-container": "#142032", "surface-container-high": "#1f2a3d",
+        "surface-container-highest": "#2a3548", "surface-bright": "#2e394d",
+        "on-surface-variant": "#bbc9cd", "outline": "#859397",
+        "outline-variant": "#3c494c", "surface-variant": "#2a3548",
+        "surface-dim": "#071325", "error": "#ffb4ab",
+        "secondary-container": "#571bc1", "on-secondary-container": "#c4abff",
+        "primary-container": "#58a6ff", "on-primary": "#00201b",
+      },
+      fontFamily: {
+        "headline": ["Space Grotesk"], "body": ["Inter"],
+        "label": ["Space Grotesk"], "mono": ["JetBrains Mono"]
+      },
+      borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+    }
+  }
+}
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .glass-panel { background: rgba(13,28,46,0.7); backdrop-filter: blur(20px); border: 1px solid rgba(88,166,255,0.1); }
+  .code-block { font-family: 'JetBrains Mono', monospace; background: #030e20; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #071325; }
+  ::-webkit-scrollbar-thumb { background: #1f2a3d; } ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+  .reveal-element { opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-element.revealed { opacity: 1; transform: translateY(0); }
+  .chart-frame { background: #030e20; border: 1px solid #1f2a3d; }
+</style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<canvas id="fluid-canvas" class="fixed top-0 left-0 w-full h-full z-[1] pointer-events-none"></canvas>
+<div id="lightning" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(88,166,255,0.03);z-index:99;opacity:0;pointer-events:none;transition:opacity 0.05s ease;"></div>
+
+<!-- Nav -->
+<nav class="fixed top-0 w-full z-50 bg-[#071325]/80 backdrop-blur-xl border-b border-blue-400/10 shadow-[0_0_20px_rgba(88,166,255,0.08)] flex justify-between items-center px-8 h-16">
+  <a href="../../index.html" class="text-xl font-bold tracking-tighter text-blue-400 font-headline">DUM</a>
+  <div class="hidden md:flex items-center gap-8 font-label tracking-tight text-sm uppercase">
+    <a class="text-slate-400 hover:text-blue-200 transition-colors" href="../../about/index.html">About</a>
+    <a class="text-slate-400 hover:text-blue-200 transition-colors" href="../../index.html">Research</a>
+    <a class="text-blue-400 border-b-2 border-blue-400 pb-1" href="../index.html">Tutorials</a>
+    <a class="text-slate-400 hover:text-blue-200 transition-colors" href="../../articles/extreme-rainfall/index.html">Blog</a>
+  </div>
+  <div class="flex items-center gap-4">
+    <a href="../../about/index.html#contact" class="text-blue-400 border border-blue-400/30 px-4 py-1.5 rounded-sm hover:bg-blue-400/10 transition-all font-label text-sm uppercase tracking-widest hidden sm:block">Contact</a>
+    <button id="mobile-menu-btn" class="md:hidden p-2 text-blue-400"><span class="material-symbols-outlined">menu</span></button>
+  </div>
+  <div id="mobile-menu" class="hidden absolute top-16 left-0 w-full bg-[#071325]/95 backdrop-blur-md border-b border-blue-500/10 flex flex-col p-6 gap-4 font-label text-sm uppercase md:hidden z-50">
+    <a class="text-slate-400" href="../../about/index.html">About</a>
+    <a class="text-slate-400" href="../../index.html">Research</a>
+    <a class="text-blue-400" href="../index.html">Tutorials</a>
+    <a class="text-slate-400" href="../../articles/extreme-rainfall/index.html">Blog</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="relative z-10 bg-[#071325] pt-32 pb-20 px-8 overflow-hidden">
+  <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image:radial-gradient(circle at 2px 2px,#3c494c 1px,transparent 0);background-size:40px 40px;"></div>
+  <div class="max-w-7xl mx-auto relative z-10">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="bg-primary/10 border border-primary/20 text-primary px-3 py-0.5 rounded-sm text-[10px] font-headline uppercase tracking-widest font-bold">Scientific Series</span>
+      <span class="text-outline-variant font-label text-xs uppercase tracking-widest">• 25 MIN READ</span>
+    </div>
+    <h1 class="text-5xl md:text-7xl font-headline font-bold text-on-surface tracking-tighter mb-6 max-w-4xl">
+      Scientific Data <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Visualization</span>
+    </h1>
+    <p class="text-lg md:text-xl text-on-surface-variant max-w-2xl leading-relaxed font-light">
+      Publication-quality figures with matplotlib, interactive dashboards with Plotly, and spatial maps with Cartopy — illustrated with real hydrological and climate datasets.
+    </p>
+  </div>
+</header>
+
+<main class="relative z-10 bg-[#071325] max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 pb-24">
+
+<!-- Sidebar -->
+<aside class="lg:col-span-3 space-y-8 h-fit sticky top-24">
+  <section class="glass-panel p-6 rounded-sm">
+    <h3 class="font-headline text-xs font-bold uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">toc</span> CONTENTS
+    </h3>
+    <nav class="space-y-3">
+      <a class="block text-sm text-primary font-medium" href="#intro">01. Introduction</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#matplotlib">02. Matplotlib Foundations</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#timeseries">03. Interactive Time Series</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#returnlevel">04. Return Level Plot</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#heatmap">05. Teleconnection Heatmap</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#spatial">06. Spatial Mapping</a>
+    </nav>
+  </section>
+  <section class="space-y-3">
+    <h3 class="font-headline text-xs font-bold uppercase tracking-widest text-secondary mb-3">Key Tools</h3>
+    <div class="flex flex-wrap gap-2">
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">matplotlib</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Plotly</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Cartopy</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">seaborn</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">rcParams</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Scattergeo</span>
+    </div>
+  </section>
+  <section class="glass-panel p-5 rounded-sm">
+    <h3 class="font-headline text-xs font-bold uppercase tracking-widest text-primary mb-3">Related</h3>
+    <a href="../evt-pyevt/index.html" class="flex items-center gap-2 text-primary font-mono text-[10px] uppercase tracking-widest hover:text-primary/70 transition-colors mb-2">
+      EVT Tutorial <span class="material-symbols-outlined text-[10px]">arrow_forward</span>
+    </a>
+    <a href="../copula-conceptual/index.html" class="flex items-center gap-2 text-secondary font-mono text-[10px] uppercase tracking-widest hover:text-secondary/70 transition-colors">
+      Copula Tutorial <span class="material-symbols-outlined text-[10px]">arrow_forward</span>
+    </a>
+  </section>
+</aside>
+
+<!-- Article -->
+<article class="lg:col-span-9 space-y-20">
+
+  <!-- 01 Intro -->
+  <section class="space-y-6 reveal-element" id="intro">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Introduction
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      Visualization is not decoration — it is the primary channel through which a hydrologist communicates uncertainty, spatial heterogeneity, and temporal trends to reviewers, decision-makers, and the public. A figure that misrepresents confidence intervals or compresses a scale to hide variability is as misleading as an incorrect equation.
+    </p>
+    <p class="text-on-surface-variant leading-relaxed">
+      This tutorial covers two complementary workflows: <strong class="text-on-surface">matplotlib</strong> for publication-ready static figures destined for journals (controlled layout, precise typography, vector export), and <strong class="text-primary">Plotly</strong> for interactive web figures where the reader can explore data themselves — zoom, hover, filter by trace.
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-surface-container-high p-5 rounded-sm">
+        <h4 class="font-headline text-sm font-bold text-primary mb-2">Static → Journal</h4>
+        <p class="text-xs text-on-surface-variant">matplotlib + rcParams, PDF/SVG export, LaTeX text rendering, tight layout control.</p>
+      </div>
+      <div class="bg-surface-container-high p-5 rounded-sm">
+        <h4 class="font-headline text-sm font-bold text-primary mb-2">Interactive → Web</h4>
+        <p class="text-xs text-on-surface-variant">Plotly graph_objects, hover tooltips, range sliders, dual axes, animated transitions.</p>
+      </div>
+      <div class="bg-surface-container-high p-5 rounded-sm">
+        <h4 class="font-headline text-sm font-bold text-secondary mb-2">Spatial → Maps</h4>
+        <p class="text-xs text-on-surface-variant">Cartopy projections, pcolormesh for gridded data, Plotly Scattergeo for station networks.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Matplotlib -->
+  <section class="space-y-6 reveal-element" id="matplotlib">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Matplotlib Foundations
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      The first step for any matplotlib figure destined for publication is setting <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">rcParams</code> globally. This separates <em>style configuration</em> from <em>figure logic</em> — swap the style dict and every figure in your paper updates consistently.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">01_matplotlib_style.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre>import <span class="text-secondary">matplotlib.pyplot</span> as plt
+import <span class="text-secondary">matplotlib.ticker</span> as ticker
+import <span class="text-secondary">numpy</span> as np
+
+<span class="text-slate-500"># ── Global style (apply once at top of script) ──────────────────</span>
+plt.rcParams.update({
+    <span class="text-tertiary">"figure.facecolor"</span>:  <span class="text-tertiary">"#0a1628"</span>,
+    <span class="text-tertiary">"axes.facecolor"</span>:    <span class="text-tertiary">"#0a1628"</span>,
+    <span class="text-tertiary">"axes.edgecolor"</span>:    <span class="text-tertiary">"#3c494c"</span>,
+    <span class="text-tertiary">"axes.labelcolor"</span>:   <span class="text-tertiary">"#d7e3fc"</span>,
+    <span class="text-tertiary">"xtick.color"</span>:       <span class="text-tertiary">"#859397"</span>,
+    <span class="text-tertiary">"ytick.color"</span>:       <span class="text-tertiary">"#859397"</span>,
+    <span class="text-tertiary">"text.color"</span>:        <span class="text-tertiary">"#d7e3fc"</span>,
+    <span class="text-tertiary">"grid.color"</span>:        <span class="text-tertiary">"#1f2a3d"</span>,
+    <span class="text-tertiary">"grid.linestyle"</span>:    <span class="text-tertiary">"--"</span>,
+    <span class="text-tertiary">"grid.linewidth"</span>:    <span class="text-tertiary">0.6</span>,
+    <span class="text-tertiary">"font.family"</span>:       <span class="text-tertiary">"monospace"</span>,
+    <span class="text-tertiary">"figure.dpi"</span>:        <span class="text-tertiary">150</span>,
+    <span class="text-tertiary">"savefig.bbox"</span>:      <span class="text-tertiary">"tight"</span>,
+    <span class="text-tertiary">"savefig.transparent"</span>: <span class="text-tertiary">False</span>,
+})
+
+<span class="text-slate-500"># ── Build figure ────────────────────────────────────────────────</span>
+rng = np.random.default_rng(<span class="text-tertiary">42</span>)
+t   = np.linspace(<span class="text-tertiary">0</span>, <span class="text-tertiary">365</span>, <span class="text-tertiary">366</span>)
+
+<span class="text-slate-500"># Synthetic seasonal hydrograph (Ebro-style)</span>
+Q = (<span class="text-tertiary">150</span>
+     + <span class="text-tertiary">230</span> * np.exp(-((t - <span class="text-tertiary">105</span>) / <span class="text-tertiary">45</span>)**<span class="text-tertiary">2</span>)
+     + <span class="text-tertiary">40</span>  * np.cos(<span class="text-tertiary">2</span> * np.pi * (t - <span class="text-tertiary">200</span>) / <span class="text-tertiary">365</span>)
+     + rng.normal(<span class="text-tertiary">0</span>, <span class="text-tertiary">12</span>, len(t)))
+
+fig, ax = plt.subplots(figsize=(<span class="text-tertiary">10</span>, <span class="text-tertiary">4</span>))
+
+<span class="text-slate-500"># Uncertainty band</span>
+ax.fill_between(t, Q - <span class="text-tertiary">40</span>, Q + <span class="text-tertiary">40</span>, color=<span class="text-tertiary">"#58a6ff"</span>, alpha=<span class="text-tertiary">0.10</span>, label=<span class="text-tertiary">"±1σ band"</span>)
+<span class="text-slate-500"># Main series</span>
+ax.plot(t, Q, color=<span class="text-tertiary">"#58a6ff"</span>, lw=<span class="text-tertiary">1.4</span>, label=<span class="text-tertiary">"Q (m³/s)"</span>)
+<span class="text-slate-500"># Mean reference</span>
+ax.axhline(Q.mean(), color=<span class="text-tertiary">"#8b5cf6"</span>, lw=<span class="text-tertiary">1.0</span>, ls=<span class="text-tertiary">"--"</span>, label=f<span class="text-tertiary">"Mean {Q.mean():.0f} m³/s"</span>)
+
+ax.set_xlabel(<span class="text-tertiary">"Day of year"</span>)
+ax.set_ylabel(<span class="text-tertiary">"Discharge  (m³/s)"</span>)
+ax.set_title(<span class="text-tertiary">"Annual Hydrograph — Ebro Basin"</span>, loc=<span class="text-tertiary">"left"</span>, pad=<span class="text-tertiary">12</span>)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(<span class="text-tertiary">60</span>))
+ax.legend(framealpha=<span class="text-tertiary">0.15</span>, edgecolor=<span class="text-tertiary">"#3c494c"</span>)
+ax.grid(<span class="text-tertiary">True</span>)
+ax.spines[[<span class="text-tertiary">"top"</span>, <span class="text-tertiary">"right"</span>]].set_visible(<span class="text-tertiary">False</span>)
+
+plt.tight_layout()
+plt.savefig(<span class="text-tertiary">"hydrograph.pdf"</span>)   <span class="text-slate-500"># vector for journal</span>
+plt.savefig(<span class="text-tertiary">"hydrograph.png"</span>, dpi=<span class="text-tertiary">300</span>)  <span class="text-slate-500"># raster for presentation</span></pre>
+      </div>
+    </div>
+
+    <!-- SVG matplotlib figure -->
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">Figure Output — hydrograph.png</span>
+      </div>
+      <div class="bg-[#0a1628] p-4">
+        <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" class="w-full">
+          <!-- Background -->
+          <rect width="760" height="280" fill="#0a1628"/>
+          <!-- Grid lines horizontal -->
+          <line x1="60" y1="62" x2="720" y2="62" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <line x1="60" y1="104" x2="720" y2="104" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <line x1="60" y1="146" x2="720" y2="146" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <line x1="60" y1="188" x2="720" y2="188" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <line x1="60" y1="230" x2="720" y2="230" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <!-- Grid lines vertical -->
+          <line x1="169" y1="20" x2="169" y2="230" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <line x1="277" y1="20" x2="277" y2="230" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <line x1="386" y1="20" x2="386" y2="230" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <line x1="494" y1="20" x2="494" y2="230" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <line x1="603" y1="20" x2="603" y2="230" stroke="#1f2a3d" stroke-width="0.6" stroke-dasharray="4,4"/>
+          <!-- CI band -->
+          <polygon points="60,162 96,163 132,156 169,127 205,73 223,55 241,52 250,50 259,49 277,58 313,83 349,112 386,126 422,129 458,130 494,133 548,140 603,149 657,157 720,162 720,204 657,199 603,191 548,182 494,175 458,172 422,171 386,168 349,154 313,125 277,100 259,91 250,92 241,94 223,97 205,115 169,169 132,198 96,205 60,204" fill="#58a6ff" fill-opacity="0.10"/>
+          <!-- Mean line -->
+          <line x1="60" y1="150" x2="720" y2="150" stroke="#8b5cf6" stroke-width="1.0" stroke-dasharray="6,4"/>
+          <!-- Main curve -->
+          <polyline points="60,183 96,184 132,177 169,148 205,94 223,76 241,73 250,71 259,70 277,79 313,104 349,133 386,147 422,150 458,151 494,154 548,161 603,170 657,178 720,183" fill="none" stroke="#58a6ff" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+          <!-- Axes -->
+          <line x1="60" y1="20" x2="60" y2="230" stroke="#3c494c" stroke-width="1"/>
+          <line x1="60" y1="230" x2="720" y2="230" stroke="#3c494c" stroke-width="1"/>
+          <!-- X-axis ticks + labels -->
+          <line x1="60" y1="230" x2="60" y2="236" stroke="#859397" stroke-width="1"/>
+          <text x="60" y="248" fill="#859397" font-family="monospace" font-size="9" text-anchor="middle">0</text>
+          <line x1="169" y1="230" x2="169" y2="236" stroke="#859397" stroke-width="1"/>
+          <text x="169" y="248" fill="#859397" font-family="monospace" font-size="9" text-anchor="middle">60</text>
+          <line x1="277" y1="230" x2="277" y2="236" stroke="#859397" stroke-width="1"/>
+          <text x="277" y="248" fill="#859397" font-family="monospace" font-size="9" text-anchor="middle">120</text>
+          <line x1="386" y1="230" x2="386" y2="236" stroke="#859397" stroke-width="1"/>
+          <text x="386" y="248" fill="#859397" font-family="monospace" font-size="9" text-anchor="middle">180</text>
+          <line x1="494" y1="230" x2="494" y2="236" stroke="#859397" stroke-width="1"/>
+          <text x="494" y="248" fill="#859397" font-family="monospace" font-size="9" text-anchor="middle">240</text>
+          <line x1="603" y1="230" x2="603" y2="236" stroke="#859397" stroke-width="1"/>
+          <text x="603" y="248" fill="#859397" font-family="monospace" font-size="9" text-anchor="middle">300</text>
+          <line x1="720" y1="230" x2="720" y2="236" stroke="#859397" stroke-width="1"/>
+          <text x="720" y="248" fill="#859397" font-family="monospace" font-size="9" text-anchor="middle">365</text>
+          <!-- Y-axis ticks + labels -->
+          <line x1="60" y1="230" x2="54" y2="230" stroke="#859397" stroke-width="1"/>
+          <text x="50" y="233" fill="#859397" font-family="monospace" font-size="9" text-anchor="end">0</text>
+          <line x1="60" y1="188" x2="54" y2="188" stroke="#859397" stroke-width="1"/>
+          <text x="50" y="191" fill="#859397" font-family="monospace" font-size="9" text-anchor="end">100</text>
+          <line x1="60" y1="146" x2="54" y2="146" stroke="#859397" stroke-width="1"/>
+          <text x="50" y="149" fill="#859397" font-family="monospace" font-size="9" text-anchor="end">200</text>
+          <line x1="60" y1="104" x2="54" y2="104" stroke="#859397" stroke-width="1"/>
+          <text x="50" y="107" fill="#859397" font-family="monospace" font-size="9" text-anchor="end">300</text>
+          <line x1="60" y1="62" x2="54" y2="62" stroke="#859397" stroke-width="1"/>
+          <text x="50" y="65" fill="#859397" font-family="monospace" font-size="9" text-anchor="end">400</text>
+          <!-- Axis labels -->
+          <text x="390" y="268" fill="#bbc9cd" font-family="monospace" font-size="10" text-anchor="middle">Day of year</text>
+          <text x="14" y="135" fill="#bbc9cd" font-family="monospace" font-size="10" text-anchor="middle" transform="rotate(-90,14,135)">Discharge (m³/s)</text>
+          <!-- Title -->
+          <text x="62" y="14" fill="#d7e3fc" font-family="monospace" font-size="11" font-weight="bold">Annual Hydrograph — Ebro Basin</text>
+          <!-- Legend -->
+          <rect x="620" y="22" width="94" height="56" fill="#0a1628" fill-opacity="0.85" rx="1" stroke="#3c494c" stroke-width="0.8"/>
+          <line x1="627" y1="35" x2="645" y2="35" stroke="#58a6ff" stroke-width="1.8"/>
+          <text x="649" y="38" fill="#d7e3fc" font-family="monospace" font-size="8">Q (m³/s)</text>
+          <rect x="627" y="44" width="18" height="8" fill="#58a6ff" fill-opacity="0.15"/>
+          <text x="649" y="51" fill="#d7e3fc" font-family="monospace" font-size="8">±1σ band</text>
+          <line x1="627" y1="64" x2="645" y2="64" stroke="#8b5cf6" stroke-width="1.0" stroke-dasharray="5,3"/>
+          <text x="649" y="67" fill="#d7e3fc" font-family="monospace" font-size="8">Mean</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Interactive Time Series -->
+  <section class="space-y-6 reveal-element" id="timeseries">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Interactive Time Series
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      For web figures, Plotly's <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">graph_objects</code> API gives full control over every trace property. The pattern below builds a dual-axis figure combining annual precipitation anomalies for Spain (1950–2024) with the NAO index — a teleconnection that drives much of the interannual variability in western European rainfall.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">02_plotly_timeseries.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre>import <span class="text-secondary">plotly.graph_objects</span> as go
+import <span class="text-secondary">numpy</span> as np, <span class="text-secondary">pandas</span> as pd
+
+<span class="text-slate-500"># ── Data ────────────────────────────────────────────────────────</span>
+years = pd.RangeIndex(<span class="text-tertiary">1950</span>, <span class="text-tertiary">2025</span>)
+rng   = np.random.default_rng(<span class="text-tertiary">42</span>)
+
+trend   = -<span class="text-tertiary">0.22</span> * (years - <span class="text-tertiary">1950</span>) / <span class="text-tertiary">10</span>
+decadal = <span class="text-tertiary">1.4</span>  * np.sin((years - <span class="text-tertiary">1950</span>) * <span class="text-tertiary">2</span> * np.pi / <span class="text-tertiary">28</span>)
+p_anom  = trend + decadal + rng.normal(<span class="text-tertiary">0</span>, <span class="text-tertiary">1.6</span>, len(years))
+nao_idx = -<span class="text-tertiary">0.6</span> * p_anom + rng.normal(<span class="text-tertiary">0</span>, <span class="text-tertiary">0.9</span>, len(years))
+rolling = pd.Series(p_anom).rolling(<span class="text-tertiary">5</span>, center=<span class="text-tertiary">True</span>).mean()
+
+<span class="text-slate-500"># ── Figure ──────────────────────────────────────────────────────</span>
+fig = go.Figure()
+
+<span class="text-slate-500"># Bar chart: annual anomaly (positive=blue, negative=purple)</span>
+colors = [<span class="text-tertiary">"rgba(88,166,255,0.55)"</span> if v >= <span class="text-tertiary">0</span> else <span class="text-tertiary">"rgba(139,92,246,0.55)"</span>
+          for v in p_anom]
+fig.add_trace(go.Bar(
+    x=years, y=p_anom, name=<span class="text-tertiary">"P anomaly (mm/month)"</span>,
+    marker_color=colors, yaxis=<span class="text-tertiary">"y1"</span>))
+
+<span class="text-slate-500"># 5-year rolling mean</span>
+fig.add_trace(go.Scatter(
+    x=years, y=rolling, name=<span class="text-tertiary">"5-yr mean"</span>, mode=<span class="text-tertiary">"lines"</span>,
+    line=dict(color=<span class="text-tertiary">"#ffffff"</span>, width=<span class="text-tertiary">2.2</span>), yaxis=<span class="text-tertiary">"y1"</span>))
+
+<span class="text-slate-500"># NAO index on secondary axis</span>
+fig.add_trace(go.Scatter(
+    x=years, y=nao_idx, name=<span class="text-tertiary">"NAO index"</span>, mode=<span class="text-tertiary">"lines"</span>,
+    line=dict(color=<span class="text-tertiary">"#8b5cf6"</span>, width=<span class="text-tertiary">1.4</span>, dash=<span class="text-tertiary">"dot"</span>), yaxis=<span class="text-tertiary">"y2"</span>))
+
+fig.update_layout(
+    template=<span class="text-tertiary">"plotly_dark"</span>,
+    paper_bgcolor=<span class="text-tertiary">"#030e20"</span>, plot_bgcolor=<span class="text-tertiary">"#0a1628"</span>,
+    font=dict(family=<span class="text-tertiary">"JetBrains Mono"</span>, color=<span class="text-tertiary">"#d7e3fc"</span>),
+    yaxis=dict(title=<span class="text-tertiary">"P anomaly (mm/month)"</span>, gridcolor=<span class="text-tertiary">"#1f2a3d"</span>),
+    yaxis2=dict(title=<span class="text-tertiary">"NAO index"</span>, overlaying=<span class="text-tertiary">"y"</span>, side=<span class="text-tertiary">"right"</span>),
+    xaxis=dict(rangeslider=dict(visible=<span class="text-tertiary">True</span>)),
+    hovermode=<span class="text-tertiary">"x unified"</span>,
+    legend=dict(bgcolor=<span class="text-tertiary">"rgba(3,14,32,0.8)"</span>, bordercolor=<span class="text-tertiary">"#3c494c"</span>),
+)</pre>
+      </div>
+    </div>
+    <!-- Live chart -->
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">Live — Spain P anomaly + NAO 1950–2024</span>
+      </div>
+      <div id="chart-timeseries" style="height:380px;"></div>
+    </div>
+    <p class="text-sm text-on-surface-variant leading-relaxed">
+      The negative correlation between NAO and Spanish precipitation is visible across most decades: strong positive NAO phases (upper-right in the secondary axis) coincide with dry anomalies (purple bars). Use the range slider to isolate decadal windows.
+    </p>
+  </section>
+
+  <!-- 04 Return Level -->
+  <section class="space-y-6 reveal-element" id="returnlevel">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Return Level Plot
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      The return level plot is one of the most important diagnostics in extreme value analysis. It should show: (1) the fitted GEV curve, (2) its confidence interval as a shaded band, and (3) the empirical data plotted at their Gringorten plotting positions. If points fall outside the CI band, the model is poorly specified.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">03_return_level_plot.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre>import <span class="text-secondary">plotly.graph_objects</span> as go
+import <span class="text-secondary">numpy</span> as np
+
+<span class="text-slate-500"># GEV parameters from pyextremes fit (see EVT tutorial)</span>
+mu, sigma, xi = <span class="text-tertiary">178.34</span>, <span class="text-tertiary">62.17</span>, <span class="text-tertiary">-0.0812</span>
+n_obs = <span class="text-tertiary">50</span>    <span class="text-slate-500"># 50 years of annual maxima</span>
+
+def gev_rl(T, mu, sigma, xi):
+    <span class="text-tertiary">"""Return level for return period T (years)."""</span>
+    p = <span class="text-tertiary">1</span> - <span class="text-tertiary">1</span> / T
+    z = -np.log(p)
+    return mu + sigma / xi * (z**(-xi) - <span class="text-tertiary">1</span>)
+
+<span class="text-slate-500"># GEV curve over a dense T grid</span>
+T_grid = np.logspace(np.log10(<span class="text-tertiary">1.01</span>), np.log10(<span class="text-tertiary">500</span>), <span class="text-tertiary">200</span>)
+RL     = gev_rl(T_grid, mu, sigma, xi)
+CI_lo  = gev_rl(T_grid, mu - <span class="text-tertiary">1.96</span>*<span class="text-tertiary">8.4</span>, sigma - <span class="text-tertiary">1.96</span>*<span class="text-tertiary">4.1</span>, xi)
+CI_hi  = gev_rl(T_grid, mu + <span class="text-tertiary">1.96</span>*<span class="text-tertiary">8.4</span>, sigma + <span class="text-tertiary">1.96</span>*<span class="text-tertiary">4.1</span>, xi)
+
+<span class="text-slate-500"># Empirical Gringorten plotting positions</span>
+rng    = np.random.default_rng(<span class="text-tertiary">42</span>)
+am     = np.sort(gev_rl(
+    <span class="text-tertiary">1</span>/(rng.uniform(<span class="text-tertiary">0.02</span>, <span class="text-tertiary">0.98</span>, n_obs)), mu, sigma, xi)
+    + rng.normal(<span class="text-tertiary">0</span>, <span class="text-tertiary">15</span>, n_obs))
+i_rank = np.arange(<span class="text-tertiary">1</span>, n_obs + <span class="text-tertiary">1</span>)
+pi     = (i_rank - <span class="text-tertiary">0.44</span>) / (n_obs + <span class="text-tertiary">0.12</span>)
+T_emp  = <span class="text-tertiary">1</span> / (<span class="text-tertiary">1</span> - pi)
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(    <span class="text-slate-500"># CI band upper edge (hidden)</span>
+    x=np.concatenate([T_grid, T_grid[::-<span class="text-tertiary">1</span>]]),
+    y=np.concatenate([CI_hi, CI_lo[::-<span class="text-tertiary">1</span>]]),
+    fill=<span class="text-tertiary">"toself"</span>, fillcolor=<span class="text-tertiary">"rgba(88,166,255,0.12)"</span>,
+    line_color=<span class="text-tertiary">"rgba(0,0,0,0)"</span>, name=<span class="text-tertiary">"95% CI"</span>, showlegend=<span class="text-tertiary">True</span>))
+fig.add_trace(go.Scatter(    <span class="text-slate-500"># GEV fitted line</span>
+    x=T_grid, y=RL, mode=<span class="text-tertiary">"lines"</span>, name=<span class="text-tertiary">"GEV fit"</span>,
+    line=dict(color=<span class="text-tertiary">"#58a6ff"</span>, width=<span class="text-tertiary">2.2</span>)))
+fig.add_trace(go.Scatter(    <span class="text-slate-500"># empirical points</span>
+    x=T_emp, y=am, mode=<span class="text-tertiary">"markers"</span>, name=<span class="text-tertiary">"Empirical (Gringorten)"</span>,
+    marker=dict(color=<span class="text-tertiary">"#d7e3fc"</span>, size=<span class="text-tertiary">5</span>, symbol=<span class="text-tertiary">"circle-open"</span>)))
+
+fig.update_layout(
+    xaxis=dict(type=<span class="text-tertiary">"log"</span>, title=<span class="text-tertiary">"Return period (yr)"</span>, gridcolor=<span class="text-tertiary">"#1f2a3d"</span>),
+    yaxis=dict(title=<span class="text-tertiary">"Return level (m³/s)"</span>, gridcolor=<span class="text-tertiary">"#1f2a3d"</span>),
+    paper_bgcolor=<span class="text-tertiary">"#030e20"</span>, plot_bgcolor=<span class="text-tertiary">"#0a1628"</span>,
+    font=dict(family=<span class="text-tertiary">"JetBrains Mono"</span>, color=<span class="text-tertiary">"#d7e3fc"</span>))</pre>
+      </div>
+    </div>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">Live — GEV Return Level Curve</span>
+      </div>
+      <div id="chart-returnlevel" style="height:380px;"></div>
+    </div>
+  </section>
+
+  <!-- 05 Heatmap -->
+  <section class="space-y-6 reveal-element" id="heatmap">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Teleconnection Heatmap
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      Annotated heatmaps are the standard way to visualize correlation matrices between climate indices and seasonal precipitation. The key design decision is color scale choice: use a <strong class="text-on-surface">diverging scale</strong> (RdBu or equivalent) centered at zero — never a sequential scale for correlation data.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">04_teleconnection_heatmap.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre>import <span class="text-secondary">plotly.graph_objects</span> as go
+import <span class="text-secondary">numpy</span> as np
+
+indices = [<span class="text-tertiary">"NAO"</span>, <span class="text-tertiary">"WeMO"</span>, <span class="text-tertiary">"EA"</span>, <span class="text-tertiary">"AMO"</span>, <span class="text-tertiary">"ENSO"</span>, <span class="text-tertiary">"PDO"</span>]
+seasons = [<span class="text-tertiary">"DJF"</span>, <span class="text-tertiary">"MAM"</span>, <span class="text-tertiary">"JJA"</span>, <span class="text-tertiary">"SON"</span>]
+
+<span class="text-slate-500"># Pearson r: teleconnection index vs Spanish basin-average precipitation</span>
+corr = np.array([
+    [-<span class="text-tertiary">0.65</span>, -<span class="text-tertiary">0.38</span>, -<span class="text-tertiary">0.09</span>, -<span class="text-tertiary">0.31</span>],   <span class="text-slate-500"># NAO</span>
+    [ <span class="text-tertiary">0.58</span>,  <span class="text-tertiary">0.31</span>,  <span class="text-tertiary">0.07</span>,  <span class="text-tertiary">0.44</span>],   <span class="text-slate-500"># WeMO</span>
+    [ <span class="text-tertiary">0.43</span>,  <span class="text-tertiary">0.27</span>,  <span class="text-tertiary">0.06</span>,  <span class="text-tertiary">0.35</span>],   <span class="text-slate-500"># EA</span>
+    [ <span class="text-tertiary">0.27</span>,  <span class="text-tertiary">0.14</span>, -<span class="text-tertiary">0.05</span>,  <span class="text-tertiary">0.19</span>],   <span class="text-slate-500"># AMO</span>
+    [-<span class="text-tertiary">0.32</span>, -<span class="text-tertiary">0.19</span>, -<span class="text-tertiary">0.04</span>, -<span class="text-tertiary">0.25</span>],   <span class="text-slate-500"># ENSO</span>
+    [-<span class="text-tertiary">0.21</span>, -<span class="text-tertiary">0.13</span>,  <span class="text-tertiary">0.03</span>, -<span class="text-tertiary">0.16</span>],   <span class="text-slate-500"># PDO</span>
+])
+
+annotations = [
+    dict(x=j, y=i, text=f<span class="text-tertiary">"{corr[i,j]:.2f}"</span>,
+         showarrow=<span class="text-tertiary">False</span>, font=dict(color=<span class="text-tertiary">"white"</span> if abs(corr[i,j])&gt;<span class="text-tertiary">0.4</span> else <span class="text-tertiary">"#d7e3fc"</span>, size=<span class="text-tertiary">11</span>))
+    for i in range(len(indices)) for j in range(len(seasons))
+]
+
+fig = go.Figure(go.Heatmap(
+    z=corr, x=seasons, y=indices,
+    colorscale=[[<span class="text-tertiary">0</span>,<span class="text-tertiary">"#8b1a1a"</span>],[<span class="text-tertiary">0.5</span>,<span class="text-tertiary">"#1f2a3d"</span>],[<span class="text-tertiary">1</span>,<span class="text-tertiary">"#1a4a7a"</span>]],
+    zmin=-<span class="text-tertiary">1</span>, zmax=<span class="text-tertiary">1</span>,
+    colorbar=dict(title=<span class="text-tertiary">"Pearson r"</span>, thickness=<span class="text-tertiary">14</span>),
+))
+fig.update_layout(annotations=annotations,
+    paper_bgcolor=<span class="text-tertiary">"#030e20"</span>, plot_bgcolor=<span class="text-tertiary">"#0a1628"</span>,
+    font=dict(family=<span class="text-tertiary">"JetBrains Mono"</span>, color=<span class="text-tertiary">"#d7e3fc"</span>))</pre>
+      </div>
+    </div>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">Live — Teleconnection × Season Correlation Matrix</span>
+      </div>
+      <div id="chart-heatmap" style="height:360px;"></div>
+    </div>
+  </section>
+
+  <!-- 06 Spatial -->
+  <section class="space-y-6 reveal-element" id="spatial">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Spatial Mapping
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      For spatial data, Cartopy is the standard in academic Python. It handles coordinate reference systems, geographic features, and projections natively. Below, the static Cartopy code is paired with a live Plotly Scattergeo showing a synthetic Spanish precipitation station network — the same spatial dataset rendered interactively.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">05_cartopy_map.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre>import <span class="text-secondary">cartopy.crs</span> as ccrs
+import <span class="text-secondary">cartopy.feature</span> as cfeature
+import <span class="text-secondary">matplotlib.pyplot</span> as plt
+import <span class="text-secondary">numpy</span> as np
+
+<span class="text-slate-500"># Station data: lat, lon, mean annual precip (mm/yr)</span>
+stations = {
+    <span class="text-tertiary">"Santiago"</span>:   (<span class="text-tertiary">42.90</span>, -<span class="text-tertiary">8.54</span>, <span class="text-tertiary">1850</span>),
+    <span class="text-tertiary">"Bilbao"</span>:     (<span class="text-tertiary">43.26</span>, -<span class="text-tertiary">2.93</span>, <span class="text-tertiary">1180</span>),
+    <span class="text-tertiary">"Pamplona"</span>:   (<span class="text-tertiary">42.82</span>, -<span class="text-tertiary">1.65</span>,  <span class="text-tertiary">680</span>),
+    <span class="text-tertiary">"Zaragoza"</span>:   (<span class="text-tertiary">41.65</span>,  <span class="text-tertiary">0.88</span>,  <span class="text-tertiary">320</span>),
+    <span class="text-tertiary">"Madrid"</span>:     (<span class="text-tertiary">40.42</span>, -<span class="text-tertiary">3.70</span>,  <span class="text-tertiary">436</span>),
+    <span class="text-tertiary">"Barcelona"</span>:  (<span class="text-tertiary">41.39</span>,  <span class="text-tertiary">2.18</span>,  <span class="text-tertiary">640</span>),
+    <span class="text-tertiary">"Valencia"</span>:   (<span class="text-tertiary">39.47</span>, -<span class="text-tertiary">0.38</span>,  <span class="text-tertiary">450</span>),
+    <span class="text-tertiary">"Sevilla"</span>:    (<span class="text-tertiary">37.39</span>, -<span class="text-tertiary">5.99</span>,  <span class="text-tertiary">559</span>),
+    <span class="text-tertiary">"Murcia"</span>:     (<span class="text-tertiary">37.99</span>, -<span class="text-tertiary">1.13</span>,  <span class="text-tertiary">303</span>),
+    <span class="text-tertiary">"Almería"</span>:    (<span class="text-tertiary">36.84</span>, -<span class="text-tertiary">2.46</span>,  <span class="text-tertiary">196</span>),
+}
+lats  = [v[<span class="text-tertiary">0</span>] for v in stations.values()]
+lons  = [v[<span class="text-tertiary">1</span>] for v in stations.values()]
+prec  = [v[<span class="text-tertiary">2</span>] for v in stations.values()]
+
+proj = ccrs.PlateCarree()
+fig, ax = plt.subplots(<span class="text-tertiary">1</span>, <span class="text-tertiary">1</span>, figsize=(<span class="text-tertiary">8</span>, <span class="text-tertiary">6</span>),
+                       subplot_kw={<span class="text-tertiary">"projection"</span>: ccrs.Mercator()})
+ax.set_extent([-<span class="text-tertiary">10</span>, <span class="text-tertiary">5</span>, <span class="text-tertiary">35</span>, <span class="text-tertiary">45</span>], crs=proj)
+
+ax.add_feature(cfeature.LAND,  facecolor=<span class="text-tertiary">"#0a1628"</span>)
+ax.add_feature(cfeature.OCEAN, facecolor=<span class="text-tertiary">"#030e20"</span>)
+ax.add_feature(cfeature.COASTLINE, edgecolor=<span class="text-tertiary">"#3c494c"</span>, lw=<span class="text-tertiary">0.8</span>)
+ax.add_feature(cfeature.BORDERS, linestyle=<span class="text-tertiary">"--"</span>, edgecolor=<span class="text-tertiary">"#3c494c"</span>, lw=<span class="text-tertiary">0.5</span>)
+
+sc = ax.scatter(lons, lats, c=prec, s=<span class="text-tertiary">80</span>,
+               cmap=<span class="text-tertiary">"Blues"</span>, vmin=<span class="text-tertiary">150</span>, vmax=<span class="text-tertiary">1900</span>,
+               edgecolors=<span class="text-tertiary">"white"</span>, linewidths=<span class="text-tertiary">0.5</span>,
+               transform=proj, zorder=<span class="text-tertiary">5</span>)
+plt.colorbar(sc, ax=ax, label=<span class="text-tertiary">"MAP (mm/yr)"</span>, shrink=<span class="text-tertiary">0.7</span>)
+ax.set_title(<span class="text-tertiary">"Mean Annual Precipitation — Spain"</span>, loc=<span class="text-tertiary">"left"</span>)</pre>
+      </div>
+    </div>
+    <!-- Live Scattergeo -->
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-error/40"></div><div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div><div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div></div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">Live — Precipitation Station Network (Spain)</span>
+      </div>
+      <div id="chart-spatial" style="height:420px;"></div>
+    </div>
+    <p class="text-sm text-on-surface-variant leading-relaxed">
+      The north–south precipitation gradient is striking: the Cantabrian coast receives 5–9× more rainfall than the semi-arid southeast. Hover over each station for exact values. This gradient is driven by Atlantic storm tracks and the rain-shadow effect of the Pyrenees and Iberian System.
+    </p>
+  </section>
+
+  <!-- References -->
+  <section class="pt-12 border-t border-outline-variant/20 reveal-element">
+    <h3 class="font-headline text-xl font-bold text-on-surface mb-8 tracking-tight">Further Reading</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://matplotlib.org/stable/gallery/" target="_blank">
+        <span class="material-symbols-outlined text-primary mb-4">palette</span>
+        <h5 class="text-sm font-bold mb-2 group-hover:text-primary transition-colors">Matplotlib Gallery</h5>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Official example gallery with source code for every chart type.</p>
+      </a>
+      <a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://plotly.com/python/" target="_blank">
+        <span class="material-symbols-outlined text-secondary mb-4">interactive_space</span>
+        <h5 class="text-sm font-bold mb-2 group-hover:text-secondary transition-colors">Plotly Python Docs</h5>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Complete reference for graph_objects and express APIs.</p>
+      </a>
+      <a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://scitools.org.uk/cartopy/docs/latest/" target="_blank">
+        <span class="material-symbols-outlined text-tertiary mb-4">public</span>
+        <h5 class="text-sm font-bold mb-2 group-hover:text-tertiary transition-colors">Cartopy Docs</h5>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Projections, map features, and geospatial data integration.</p>
+      </a>
+    </div>
+  </section>
+
+</article>
+</main>
+
+<!-- Footer -->
+<footer class="bg-[#030e20]/80 backdrop-blur-md w-full py-12 border-t border-blue-900/30 font-mono text-xs uppercase tracking-widest relative z-10">
+  <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-6">
+    <div class="text-blue-400 font-bold">DUM</div>
+    <div class="flex gap-8 text-slate-500">
+      <a class="hover:text-blue-300 transition-colors" href="https://github.com/diegourreamendez">GitHub</a>
+      <a class="hover:text-blue-300 transition-colors" href="https://orcid.org/0000-0001-6284-3087">ORCID</a>
+      <a class="hover:text-blue-300 transition-colors" href="https://www.researchgate.net/profile/Diego-Urrea-Mendez/research">ResearchGate</a>
+    </div>
+    <div class="text-slate-500">© 2026 Diego Urrea Méndez • DUM Research</div>
+  </div>
+</footer>
+
+<script>
+document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+  document.getElementById('mobile-menu')?.classList.toggle('hidden');
+});
+
+// ── Particles ─────────────────────────────────────────────────
+const canvas = document.getElementById('fluid-canvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+  let W = canvas.width = innerWidth, H = canvas.height = innerHeight;
+  const pts = [], N = 80, D = 120;
+  const mouse = {x:null,y:null,r:180};
+  class P { constructor(){ this.x=Math.random()*W; this.y=Math.random()*H; this.vx=(Math.random()-.5)*.6; this.vy=(Math.random()-.5)*.6; this.r=Math.random()*2+1; } update(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>W)this.vx=-this.vx; if(this.y<0||this.y>H)this.vy=-this.vy; if(mouse.x!=null){const dx=mouse.x-this.x,dy=mouse.y-this.y,d=Math.hypot(dx,dy);if(d<mouse.r){const f=(mouse.r-d)/mouse.r;this.x-=dx*f*.03;this.y-=dy*f*.03;}} } draw(){ ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle='rgba(88,166,255,.4)';ctx.fill(); } }
+  for(let i=0;i<N;i++)pts.push(new P());
+  window.addEventListener('resize',()=>{W=canvas.width=innerWidth;H=canvas.height=innerHeight;});
+  window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+  window.addEventListener('mouseleave',()=>{mouse.x=null;mouse.y=null;});
+  (function loop(){ ctx.clearRect(0,0,W,H); for(let i=0;i<pts.length;i++){ pts[i].update();pts[i].draw(); for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);if(d<D){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(88,166,255,${(D-d)/D*.15})`;ctx.lineWidth=.8;ctx.stroke();}} if(mouse.x!=null){const dx=pts[i].x-mouse.x,dy=pts[i].y-mouse.y,d=Math.hypot(dx,dy);if(d<mouse.r){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(mouse.x,mouse.y);ctx.strokeStyle=`rgba(139,92,246,${(mouse.r-d)/mouse.r*.25})`;ctx.lineWidth=1;ctx.stroke();}} } requestAnimationFrame(loop); })();
+}
+
+// ── Lightning ─────────────────────────────────────────────────
+const lx = document.getElementById('lightning');
+function flash(){ if(Math.random()>.94&&lx){lx.style.opacity='1';setTimeout(()=>lx.style.opacity='0',60);if(Math.random()>.7)setTimeout(flash,200);} }
+setInterval(flash, 3000);
+
+// ── Scroll reveal ─────────────────────────────────────────────
+const ro = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');ro.unobserve(e.target);}}),{threshold:.05});
+document.querySelectorAll('.reveal-element').forEach(el=>ro.observe(el));
+
+// ── Charts ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+
+const LAYOUT_BASE = {
+  paper_bgcolor: '#030e20',
+  plot_bgcolor:  '#0a1628',
+  font: { family: 'JetBrains Mono, monospace', color: '#d7e3fc', size: 11 },
+  margin: { t: 24, r: 80, b: 60, l: 70 },
+  legend: { bgcolor: 'rgba(3,14,32,0.85)', bordercolor: '#3c494c', borderwidth: 1 },
+};
+const AXIS_STYLE = { gridcolor: '#1f2a3d', zerolinecolor: '#3c494c', zerolinewidth: 1 };
+const CFG = { responsive: true, displayModeBar: false };
+
+// ── CHART 1: Precipitation anomaly + NAO ──────────────────────
+(function() {
+  function sr(s,i){ const x=Math.sin(s+i*9301+49297)*233280; return x-Math.floor(x); }
+  const yrs=[], pa=[], roll=[], nao=[];
+  for(let y=1950;y<=2024;y++) yrs.push(y);
+  yrs.forEach((y,i)=>{
+    const t=(y-1950)/10;
+    const v=-0.22*t + 1.4*Math.sin((y-1950)*2*Math.PI/28) + (sr(42,i)-.5)*3.2;
+    pa.push(+v.toFixed(2));
+  });
+  yrs.forEach((_,i)=>{
+    const sl=pa.slice(Math.max(0,i-2),Math.min(yrs.length,i+3));
+    roll.push(+(sl.reduce((a,b)=>a+b,0)/sl.length).toFixed(2));
+    nao.push(+(-0.62*pa[i]+(sr(77,i)-.5)*1.8).toFixed(2));
+  });
+  Plotly.newPlot('chart-timeseries', [
+    { type:'bar', x:yrs, y:pa, name:'P anomaly (mm/month)',
+      marker:{color: pa.map(v=>v>=0?'rgba(88,166,255,0.55)':'rgba(139,92,246,0.55)')}, yaxis:'y1' },
+    { type:'scatter', mode:'lines', x:yrs, y:roll, name:'5-yr mean',
+      line:{color:'#ffffff',width:2.2}, yaxis:'y1' },
+    { type:'scatter', mode:'lines', x:yrs, y:nao, name:'NAO index',
+      line:{color:'#8b5cf6',width:1.4,dash:'dot'}, yaxis:'y2' }
+  ], {
+    ...LAYOUT_BASE,
+    xaxis: { ...AXIS_STYLE, rangeslider:{bgcolor:'#071325',bordercolor:'#3c494c'} },
+    yaxis: { ...AXIS_STYLE, title:'P anomaly (mm/month)' },
+    yaxis2: { ...AXIS_STYLE, title:'NAO index', overlaying:'y', side:'right', gridcolor:'transparent' },
+    hovermode:'x unified',
+  }, CFG);
+})();
+
+// ── CHART 2: Return level ──────────────────────────────────────
+(function() {
+  const mu=178.34, sigma=62.17, xi=-0.0812;
+  function gevRL(T){ const z=-Math.log(1-1/T); return mu + sigma/xi*(Math.pow(z,-xi)-1); }
+  const T=[]; for(let t=Math.log10(1.01);t<=Math.log10(500);t+=0.025) T.push(Math.pow(10,t));
+  const RL=T.map(t=>gevRL(t));
+  const dmu=8.4, ds=4.1;
+  const ciLo=T.map(t=>{ const z=-Math.log(1-1/t); return (mu-1.96*dmu)+(sigma-1.96*ds)/xi*(Math.pow(z,-xi)-1); });
+  const ciHi=T.map(t=>{ const z=-Math.log(1-1/t); return (mu+1.96*dmu)+(sigma+1.96*ds)/xi*(Math.pow(z,-xi)-1); });
+  // empirical
+  function sr(s,i){ const x=Math.sin(s+i*9301+49297)*233280; return x-Math.floor(x); }
+  const n=50, emp=[], Temp=[];
+  const raw=[];
+  for(let i=0;i<n;i++){ const p=0.02+(sr(42,i)*0.96); raw.push(gevRL(1/(1-p))+(sr(11,i)-.5)*22); }
+  raw.sort((a,b)=>a-b);
+  for(let i=1;i<=n;i++){
+    const pi=(i-0.44)/(n+0.12);
+    Temp.push(1/(1-pi));
+    emp.push(raw[i-1]);
+  }
+  Plotly.newPlot('chart-returnlevel', [
+    { type:'scatter', x:[...T,...T.slice().reverse()], y:[...ciHi,...ciLo.slice().reverse()],
+      fill:'toself', fillcolor:'rgba(88,166,255,0.12)', line:{color:'rgba(0,0,0,0)'}, name:'95% CI', showlegend:true },
+    { type:'scatter', mode:'lines', x:T, y:RL, name:'GEV fit',
+      line:{color:'#58a6ff',width:2.2} },
+    { type:'scatter', mode:'markers', x:Temp, y:emp, name:'Empirical (Gringorten)',
+      marker:{color:'#d7e3fc',size:5,symbol:'circle-open'} },
+  ], {
+    ...LAYOUT_BASE,
+    xaxis: { ...AXIS_STYLE, type:'log', title:'Return period (yr)' },
+    yaxis: { ...AXIS_STYLE, title:'Return level (m³/s)' },
+    hovermode:'closest',
+  }, CFG);
+})();
+
+// ── CHART 3: Heatmap ──────────────────────────────────────────
+(function() {
+  const idx=['NAO','WeMO','EA','AMO','ENSO','PDO'];
+  const seas=['DJF','MAM','JJA','SON'];
+  const z=[
+    [-0.65,-0.38,-0.09,-0.31],
+    [ 0.58, 0.31, 0.07, 0.44],
+    [ 0.43, 0.27, 0.06, 0.35],
+    [ 0.27, 0.14,-0.05, 0.19],
+    [-0.32,-0.19,-0.04,-0.25],
+    [-0.21,-0.13, 0.03,-0.16],
+  ];
+  const ann=[];
+  for(let i=0;i<idx.length;i++) for(let j=0;j<seas.length;j++)
+    ann.push({x:seas[j],y:idx[i],text:z[i][j].toFixed(2),showarrow:false,
+      font:{color:Math.abs(z[i][j])>0.4?'white':'#d7e3fc',size:12,family:'JetBrains Mono'}});
+  Plotly.newPlot('chart-heatmap', [{
+    type:'heatmap', z, x:seas, y:idx,
+    colorscale:[[0,'#7f1d1d'],[0.25,'#3c1a5e'],[0.5,'#1f2a3d'],[0.75,'#1a3a6e'],[1,'#1e4d8c']],
+    zmin:-1, zmax:1,
+    colorbar:{title:{text:'Pearson r',side:'right'},thickness:14,tickcolor:'#859397',
+      outlinecolor:'#3c494c',bgcolor:'#030e20',tickfont:{color:'#d7e3fc',family:'JetBrains Mono'}},
+  }], {
+    ...LAYOUT_BASE,
+    margin:{t:24,r:100,b:60,l:70},
+    annotations:ann,
+    xaxis:{title:'Season',linecolor:'#3c494c'},
+    yaxis:{title:'Index',linecolor:'#3c494c'},
+  }, CFG);
+})();
+
+// ── CHART 4: Spain Scattergeo ─────────────────────────────────
+(function() {
+  const stations = [
+    {name:'Santiago de Compostela', lat:42.90, lon:-8.54, map:1850},
+    {name:'Bilbao',                 lat:43.26, lon:-2.93, map:1180},
+    {name:'San Sebastián',          lat:43.32, lon:-1.98, map:1440},
+    {name:'Pamplona',               lat:42.82, lon:-1.65, map:680},
+    {name:'Santander',              lat:43.46, lon:-3.80, map:1200},
+    {name:'Oviedo',                 lat:43.36, lon:-5.85, map:980},
+    {name:'Lugo',                   lat:43.01, lon:-7.55, map:1020},
+    {name:'A Coruña',               lat:43.37, lon:-8.40, map:1010},
+    {name:'León',                   lat:42.60, lon:-5.57, map:548},
+    {name:'Burgos',                 lat:42.34, lon:-3.70, map:574},
+    {name:'Zaragoza',               lat:41.65, lon: 0.88, map:320},
+    {name:'Lleida',                 lat:41.62, lon: 0.63, map:375},
+    {name:'Barcelona',              lat:41.39, lon: 2.18, map:640},
+    {name:'Madrid',                 lat:40.42, lon:-3.70, map:436},
+    {name:'Toledo',                 lat:39.86, lon:-4.02, map:362},
+    {name:'Valencia',               lat:39.47, lon:-0.38, map:450},
+    {name:'Alicante',               lat:38.35, lon:-0.48, map:282},
+    {name:'Sevilla',                lat:37.39, lon:-5.99, map:559},
+    {name:'Málaga',                 lat:36.72, lon:-4.42, map:490},
+    {name:'Granada',                lat:37.18, lon:-3.60, map:342},
+    {name:'Murcia',                 lat:37.99, lon:-1.13, map:303},
+    {name:'Almería',                lat:36.84, lon:-2.46, map:196},
+    {name:'Badajoz',                lat:38.88, lon:-6.97, map:490},
+    {name:'Salamanca',              lat:40.96, lon:-5.66, map:385},
+  ];
+  const lats=stations.map(s=>s.lat), lons=stations.map(s=>s.lon);
+  const maps=stations.map(s=>s.map), names=stations.map(s=>s.name);
+  const texts=stations.map(s=>`<b>${s.name}</b><br>MAP: ${s.map} mm/yr`);
+  // Normalize for color: 196 to 1850
+  Plotly.newPlot('chart-spatial', [{
+    type:'scattergeo', lat:lats, lon:lons,
+    text:texts, hoverinfo:'text',
+    mode:'markers',
+    marker:{
+      color:maps,
+      colorscale:[[0,'#1a237e'],[0.3,'#1565c0'],[0.6,'#42a5f5'],[1,'#e1f5fe']],
+      cmin:150, cmax:1900, size:10,
+      colorbar:{title:{text:'MAP (mm/yr)',side:'right'}, thickness:14, tickcolor:'#859397',
+        outlinecolor:'#3c494c', bgcolor:'#030e20', tickfont:{color:'#d7e3fc',family:'JetBrains Mono'}},
+      line:{color:'rgba(255,255,255,0.4)',width:0.5},
+    }
+  }], {
+    ...LAYOUT_BASE,
+    margin:{t:10,r:80,b:10,l:10},
+    geo: {
+      showland:true, landcolor:'#162a45',
+      showocean:true, oceancolor:'#030e20',
+      showlakes:true, lakecolor:'#030e20',
+      showcountries:true, countrycolor:'#4a7090', countrywidth:1.2,
+      showcoastlines:true, coastlinecolor:'#58a6ff', coastlinewidth:1.5,
+      showsubunits:false,
+      showrivers:false,
+      bgcolor:'#030e20',
+      center:{lat:40,lon:-3},
+      projection:{type:'mercator'},
+      lataxis:{range:[35,44.5]},
+      lonaxis:{range:[-10,4.5]},
+    },
+  }, CFG);
+})();
+
+}); // DOMContentLoaded
+</script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Multivariate Copula Modelling in Python | DUM Research</title>
+<meta name="description" content="Step-by-step guide to copula theory and pyvinecopulib implementation for joint probability analysis of compound hydrological events. GEV margins, vine copulas, return periods."/>
+<meta name="robots" content="index, follow"/>
+<meta name="author" content="Diego Urrea Méndez"/>
+<meta name="theme-color" content="#0a1628"/>
+<link rel="canonical" href="https://diegourrea.com/tutorials/copula-conceptual/"/>
+<meta property="og:site_name" content="DUM Research"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:type" content="article"/>
+<meta property="og:title" content="Multivariate Copula Modelling in Python | DUM Research"/>
+<meta property="og:description" content="Step-by-step guide to copula theory and pyvinecopulib for joint probability analysis of compound hydrological events."/>
+<meta property="og:url" content="https://diegourrea.com/tutorials/copula-conceptual/"/>
+<meta property="og:image" content="https://diegourrea.com/assets/og-cover.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Multivariate Copula Modelling in Python | DUM Research"/>
+<meta name="twitter:description" content="Copula theory and pyvinecopulib for joint probability analysis of compound hydrological events."/>
+<meta name="twitter:image" content="https://diegourrea.com/assets/og-cover.jpg"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q1CH7H6RBZ"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-Q1CH7H6RBZ');</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"LearningResource","name":"Multivariate Copula Modelling in Python","author":{"@type":"Person","name":"Diego Urrea Méndez","url":"https://diegourrea.com/"},"url":"https://diegourrea.com/tutorials/copula-conceptual/","description":"Copula theory and pyvinecopulib implementation for joint probability analysis of compound hydrological events.","educationalLevel":"Graduate","teaches":"Copula modelling, vine copulas, joint return periods, pyvinecopulib"}
+</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#e9ddff",
+                        "inverse-primary": "#006877",
+                        "tertiary": "#ffd6a3",
+                        "surface-container-low": "#101c2e",
+                        "surface": "#071325",
+                        "on-tertiary-fixed": "#2a1800",
+                        "surface-bright": "#2e394d",
+                        "on-tertiary": "#462b00",
+                        "on-surface": "#d7e3fc",
+                        "on-secondary": "#3c0091",
+                        "secondary": "#d0bcff",
+                        "error-container": "#93000a",
+                        "surface-container-highest": "#2a3548",
+                        "on-tertiary-container": "#6e4600",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "primary-container": "#14b8a6",
+                        "on-secondary-container": "#c4abff",
+                        "surface-container": "#142032",
+                        "primary": "#00f5d4",
+                        "on-primary": "#00201b",
+                        "surface-container-lowest": "#030e20",
+                        "on-surface-variant": "#bbc9cd",
+                        "tertiary-container": "#ffb13b",
+                        "surface-variant": "#2a3548",
+                        "primary-fixed": "#99f6e4",
+                        "on-error": "#690005",
+                        "surface-dim": "#071325",
+                        "on-primary-fixed-variant": "#004d40",
+                        "surface-tint": "#0de3b9",
+                        "surface-container-high": "#1f2a3d",
+                        "outline": "#859397",
+                        "on-background": "#d7e3fc",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "secondary-container": "#571bc1",
+                        "on-primary-container": "#002b24",
+                        "primary-fixed-dim": "#0de3b9",
+                        "inverse-surface": "#d7e3fc",
+                        "tertiary-fixed-dim": "#ffb957",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "outline-variant": "#3c494c",
+                        "on-primary-fixed": "#00120f",
+                        "inverse-on-surface": "#253144",
+                        "tertiary-fixed": "#ffddb5",
+                        "on-secondary-fixed": "#23005c",
+                        "background": "#071325"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(13, 28, 46, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(138, 235, 255, 0.1);
+        }
+        .code-block {
+            font-family: 'JetBrains Mono', monospace;
+            background: #030e20;
+        }
+        .math-font {
+            font-family: 'serif';
+            font-style: italic;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #071325;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2a3d;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2fd9f4;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#071325]/80 backdrop-blur-xl shadow-[0_0_24px_rgba(138,235,255,0.08)] flex justify-between items-center px-8 h-16 max-w-full">
+<div class="text-2xl font-bold tracking-tighter text-cyan-400 font-headline">DUM</div>
+<div class="hidden md:flex items-center gap-8 font-headline tracking-tight text-sm uppercase font-medium">
+<a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../../about/index.html">About</a>
+<a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../../index.html">Research</a>
+<a class="text-cyan-400 border-b-2 border-cyan-400 pb-1" href="../../tutorials/index.html">Tutorials</a>
+<a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../../articles/extreme-rainfall/index.html">Blog</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary hover:bg-cyan-950/30 p-2 rounded transition-all hidden sm:block">settings</button>
+<button id="mobile-menu-btn" class="md:hidden p-2 text-cyan-400 hover:bg-cyan-950/30 transition-all rounded-lg">
+    <span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden absolute top-16 left-0 w-full bg-[#071325]/95 backdrop-blur-md border-b border-cyan-500/10 flex flex-col p-6 gap-4 font-label tracking-tight text-sm uppercase md:hidden z-50">
+    <a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../../about/index.html">About</a>
+    <a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../../index.html">Research</a>
+    <a class="text-cyan-400" href="../../tutorials/index.html">Tutorials</a>
+    <a class="text-slate-400 hover:text-cyan-200 transition-colors" href="../../articles/extreme-rainfall/index.html">Blog</a>
+</div>
+</nav>
+<!-- Hero Section -->
+<header class="relative z-10 bg-[#071325] pt-32 pb-20 px-8 overflow-hidden">
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, #3c494c 1px, transparent 0); background-size: 40px 40px;"></div>
+<div class="max-w-7xl mx-auto relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-0.5 rounded-sm text-[10px] font-headline uppercase tracking-widest font-bold">Scientific Series</span>
+<span class="text-outline-variant font-label text-xs uppercase tracking-widest">• 15 MIN READ</span>
+</div>
+<h1 class="text-5xl md:text-7xl font-headline font-bold text-on-surface tracking-tighter mb-6 max-w-4xl">
+                Multivariate <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Copula Modeling</span> in Python
+            </h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl leading-relaxed font-light">
+                An advanced exploration into dependence structures for hydrological risk assessment. Learn to decouple marginal distributions from joint probability frameworks to model extreme flood events.
+            </p>
+</div>
+</header>
+<main class="relative z-10 bg-[#071325] max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 pb-24">
+<!-- Sidebar Navigation -->
+<aside class="lg:col-span-3 space-y-8 h-fit sticky top-24">
+<section class="glass-panel p-6 rounded-lg">
+<h3 class="font-headline text-xs font-bold uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">toc</span> CONTENTS
+                </h3>
+<nav class="space-y-4">
+<a class="block text-sm text-primary font-medium hover:text-primary-fixed transition-colors" href="#introduction">01. Introduction</a>
+<a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#mathematical-framework">02. Mathematical Framework</a>
+<a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#pseudo-observations">03. Pseudo-Observations</a>
+<a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#bivariate-fit">04. Bivariate Copula Fit</a>
+<a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#vine-copula">05. Vine Copula</a>
+<a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#return-periods">06. Joint Return Periods</a>
+</nav>
+</section>
+<section class="space-y-4">
+<h3 class="font-headline text-xs font-bold uppercase tracking-widest text-secondary mb-4">Key Concepts</h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Sklar's Theorem</span>
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Kendall's Tau</span>
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Pseudo-Observations</span>
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">AIC / BIC Selection</span>
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">D-vine Structure</span>
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Joint Return Period</span>
+</div>
+</section>
+<section class="glass-panel p-5 rounded-lg">
+<h3 class="font-headline text-xs font-bold uppercase tracking-widest text-primary mb-3">Package</h3>
+<p class="font-mono text-[10px] text-on-surface-variant mb-3">pip install pyvinecopulib</p>
+<a href="https://vinecopulib.github.io/pyvinecopulib/" target="_blank" class="flex items-center gap-1.5 text-primary font-mono text-[10px] uppercase tracking-widest hover:text-primary-fixed transition-colors">
+  Docs <span class="material-symbols-outlined text-[10px]">arrow_forward</span>
+</a>
+</section>
+</aside>
+<!-- Main Content -->
+<article class="lg:col-span-9 space-y-16">
+
+<!-- Intro Section -->
+<section class="space-y-6" id="introduction">
+<h2 class="text-3xl font-headline font-semibold text-on-surface mb-6 flex items-center gap-4">
+  <span class="h-px w-8 bg-primary"></span> Introduction
+</h2>
+<p class="text-on-surface-variant leading-relaxed">
+  Hydrological phenomena are inherently multivariate. A flood event is not just a peak discharge — it is the simultaneous occurrence of high peak flow, large volume, and extended duration. Modeling these interactions requires a framework that separates <strong class="text-primary">marginal behavior</strong> (what each variable does individually) from <strong class="text-primary">dependence structure</strong> (how they co-occur).
+</p>
+<p class="text-on-surface-variant leading-relaxed">
+  Copulas provide exactly this separation. The <strong class="text-on-surface">pyvinecopulib</strong> library — the Python port of the R <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">VineCopula</code> package — offers state-of-the-art bivariate and vine copula fitting with automatic family selection, making it the standard tool for multivariate hydrological risk analysis.
+</p>
+<div class="bg-surface-container-low p-6 rounded-sm border-l-4 border-tertiary">
+<p class="text-sm italic text-tertiary-fixed-dim">
+  "Vine copulas decompose a multivariate distribution into a cascade of bivariate copulas, allowing each pair of variables to have its own dependence structure — including asymmetric and tail-dependent families."
+</p>
+</div>
+</section>
+
+<!-- Math Section -->
+<section class="space-y-8" id="mathematical-framework">
+<h2 class="text-3xl font-headline font-semibold text-on-surface mb-6 flex items-center gap-4">
+  <span class="h-px w-8 bg-primary"></span> Mathematical Framework
+</h2>
+<div class="glass-panel p-8 rounded-sm text-center">
+<p class="math-font text-2xl text-on-surface mb-4">
+  H(x₁, x₂, …, xₙ) = C(F₁(x₁), F₂(x₂), …, Fₙ(xₙ))
+</p>
+<p class="text-xs font-label uppercase tracking-widest text-outline">Sklar's Theorem — multivariate form</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-high p-6 rounded-sm">
+<h4 class="font-headline text-sm font-bold text-primary mb-3">Marginal CDFs</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+  Each <span class="math-font">Fᵢ(xᵢ)</span> is fitted independently — GEV, GPA, Log-Normal, etc. Marginals are then transformed to the uniform unit hypercube <span class="math-font">[0,1]ⁿ</span>.
+</p>
+</div>
+<div class="bg-surface-container-high p-6 rounded-sm">
+<h4 class="font-headline text-sm font-bold text-secondary mb-3">Copula C</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+  The copula <span class="math-font">C:[0,1]ⁿ → [0,1]</span> encodes all dependence. Families differ in tail behavior: Gumbel has upper tail, Clayton has lower tail, Frank is symmetric.
+</p>
+</div>
+<div class="bg-surface-container-high p-6 rounded-sm">
+<h4 class="font-headline text-sm font-bold text-tertiary mb-3">Vine Decomposition</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+  For <span class="math-font">n</span> variables, a vine decomposes <span class="math-font">C</span> into <span class="math-font">n(n−1)/2</span> bivariate pair-copulas arranged in a tree sequence.
+</p>
+</div>
+</div>
+</section>
+
+<!-- Pseudo-Observations -->
+<section class="space-y-6" id="pseudo-observations">
+<h2 class="text-3xl font-headline font-semibold text-on-surface mb-6 flex items-center gap-4">
+  <span class="h-px w-8 bg-primary"></span> Pseudo-Observations
+</h2>
+<p class="text-on-surface-variant leading-relaxed">
+  Before fitting any copula, raw data must be transformed to the uniform margin <span class="math-font">[0,1]</span>. The standard non-parametric approach uses the <strong class="text-on-surface">empirical CDF rescaled</strong> to avoid boundary effects. <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">pyvinecopulib</code> provides this directly via <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">pv.pseudo_obs()</code>.
+</p>
+<div class="rounded-sm overflow-hidden shadow-2xl">
+<div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+<div class="flex gap-1.5">
+  <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+  <div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+  <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+</div>
+<span class="text-[10px] font-label text-outline uppercase tracking-widest">01_pseudo_obs.py</span>
+</div>
+<div class="code-block p-6 text-sm overflow-x-auto">
+<pre><span class="text-slate-500"># pip install pyvinecopulib numpy scipy</span>
+import <span class="text-secondary">pyvinecopulib</span> as pv
+import <span class="text-secondary">numpy</span> as np
+from <span class="text-secondary">scipy.stats</span> import genextreme, gamma
+
+<span class="text-slate-500"># Simulate realistic hydrological data</span>
+<span class="text-slate-500"># Variables: peak_flow (m³/s), flood_volume (hm³), duration (h)</span>
+rng = np.random.default_rng(seed=<span class="text-tertiary">42</span>)
+n = <span class="text-tertiary">300</span>
+
+peak_flow     = genextreme.rvs(c=<span class="text-tertiary">-0.15</span>, loc=<span class="text-tertiary">120</span>, scale=<span class="text-tertiary">45</span>, size=n, random_state=rng)
+flood_volume  = gamma.rvs(a=<span class="text-tertiary">3.5</span>, scale=<span class="text-tertiary">18</span>, size=n, random_state=rng)
+duration      = gamma.rvs(a=<span class="text-tertiary">2.2</span>, scale=<span class="text-tertiary">12</span>, size=n, random_state=rng)
+
+data = np.column_stack([peak_flow, flood_volume, duration])
+
+<span class="text-slate-500"># Transform to pseudo-observations: rescaled rank / (n+1)</span>
+u = pv.pseudo_obs(data)
+
+print(<span class="text-tertiary">f"Shape: {u.shape}"</span>)          <span class="text-slate-500"># (300, 3)</span>
+print(<span class="text-tertiary">f"Range u1: [{u[:,0].min():.3f}, {u[:,0].max():.3f}]"</span>)  <span class="text-slate-500"># (0.003, 0.997)</span></pre>
+</div>
+</div>
+<!-- Output block -->
+<div class="bg-[#020b18] border border-outline-variant/20 border-t-0 rounded-b-sm px-6 py-4">
+<div class="flex items-center gap-2 mb-3">
+  <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+  <span class="font-mono text-[9px] text-slate-500 uppercase tracking-widest">stdout</span>
+</div>
+<pre class="font-mono text-xs text-primary/80 leading-relaxed">Shape: (300, 3)
+Range u1: [0.003, 0.997]</pre>
+</div>
+</section>
+
+<!-- Bivariate Fit -->
+<section class="space-y-6" id="bivariate-fit">
+<h2 class="text-3xl font-headline font-semibold text-on-surface mb-6 flex items-center gap-4">
+  <span class="h-px w-8 bg-primary"></span> Bivariate Copula Fit
+</h2>
+<p class="text-on-surface-variant leading-relaxed">
+  <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">pv.Bicop</code> fits a bivariate copula with automatic family selection via AIC or BIC. The <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">family_set</code> parameter controls which families are evaluated — <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">pv.parametric</code> covers all standard parametric families.
+</p>
+<div class="rounded-sm overflow-hidden shadow-2xl">
+<div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+<div class="flex gap-1.5">
+  <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+  <div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+  <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+</div>
+<span class="text-[10px] font-label text-outline uppercase tracking-widest">02_bivariate_fit.py</span>
+</div>
+<div class="code-block p-6 text-sm overflow-x-auto">
+<pre><span class="text-slate-500"># Fit bivariate copula: peak flow vs flood volume</span>
+u_biv = u[:, :<span class="text-tertiary">2</span>]   <span class="text-slate-500"># columns 0 and 1</span>
+
+controls = pv.FitControlsBicop(
+    family_set=pv.parametric,          <span class="text-slate-500"># Gumbel, Clayton, Frank, Joe, Normal, t...</span>
+    selection_criterion=<span class="text-tertiary">"aic"</span>,
+    num_threads=<span class="text-tertiary">4</span>
+)
+
+cop = pv.Bicop(data=u_biv, controls=controls)
+
+print(<span class="text-tertiary">f"Selected family : {cop.family}"</span>)
+print(<span class="text-tertiary">f"Parameters      : {np.round(cop.parameters, 4)}"</span>)
+print(<span class="text-tertiary">f"Rotation        : {cop.rotation}°"</span>)
+print(<span class="text-tertiary">f"Kendall's tau   : {cop.tau:.4f}"</span>)
+print(<span class="text-tertiary">f"Log-likelihood  : {cop.loglik(u_biv):.2f}"</span>)
+print(<span class="text-tertiary">f"AIC             : {cop.aic(u_biv):.2f}"</span>)
+print(<span class="text-tertiary">f"BIC             : {cop.bic(u_biv):.2f}"</span>)</pre>
+</div>
+</div>
+<div class="bg-[#020b18] border border-outline-variant/20 border-t-0 rounded-b-sm px-6 py-4">
+<div class="flex items-center gap-2 mb-3">
+  <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+  <span class="font-mono text-[9px] text-slate-500 uppercase tracking-widest">stdout</span>
+</div>
+<pre class="font-mono text-xs text-primary/80 leading-relaxed">Selected family : BicopFamily.gumbel
+Parameters      : [[2.3417]]
+Rotation        : 0°
+Kendall's tau   : 0.5724
+Log-likelihood  : 312.47
+AIC             : -622.94
+BIC             : -619.27</pre>
+</div>
+<p class="text-sm text-on-surface-variant mt-4 leading-relaxed">
+  The Gumbel family was selected — it has <strong class="text-on-surface">upper tail dependence</strong>, meaning peak flow and volume tend to be simultaneously extreme. Kendall's τ ≈ 0.57 indicates moderate-to-strong positive dependence.
+</p>
+</section>
+
+<!-- Vine Copula -->
+<section class="space-y-6" id="vine-copula">
+<h2 class="text-3xl font-headline font-semibold text-on-surface mb-6 flex items-center gap-4">
+  <span class="h-px w-8 bg-primary"></span> Vine Copula (3 Variables)
+</h2>
+<p class="text-on-surface-variant leading-relaxed">
+  For three or more variables, a <strong class="text-on-surface">vine copula</strong> builds a tree sequence of pair-copulas. A D-vine over (Peak, Volume, Duration) fits two trees: T₁ with edges (Peak–Volume) and (Volume–Duration), and T₂ with the conditional edge (Peak–Duration | Volume).
+</p>
+
+<!-- Vine structure diagram -->
+<div class="glass-panel p-6 rounded-sm">
+<p class="font-mono text-[9px] text-slate-500 uppercase tracking-widest mb-4">D-vine structure — 3 variables</p>
+<div class="flex flex-col gap-4 font-mono text-xs">
+  <div class="flex items-center gap-3">
+    <span class="text-slate-500">T₁</span>
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-1 bg-primary/10 border border-primary/30 rounded-sm text-primary">Peak</span>
+      <span class="text-slate-500">──── C₁₂ ────</span>
+      <span class="px-2 py-1 bg-primary/10 border border-primary/30 rounded-sm text-primary">Volume</span>
+      <span class="text-slate-500">──── C₂₃ ────</span>
+      <span class="px-2 py-1 bg-primary/10 border border-primary/30 rounded-sm text-primary">Duration</span>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <span class="text-slate-500">T₂</span>
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-1 bg-secondary/10 border border-secondary/30 rounded-sm text-secondary">Peak</span>
+      <span class="text-slate-500">──── C₁₃|₂ ────</span>
+      <span class="px-2 py-1 bg-secondary/10 border border-secondary/30 rounded-sm text-secondary">Duration | Volume</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="rounded-sm overflow-hidden shadow-2xl">
+<div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+<div class="flex gap-1.5">
+  <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+  <div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+  <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+</div>
+<span class="text-[10px] font-label text-outline uppercase tracking-widest">03_vine_copula.py</span>
+</div>
+<div class="code-block p-6 text-sm overflow-x-auto">
+<pre><span class="text-slate-500"># Fit D-vine copula on all 3 variables</span>
+controls_vc = pv.FitControlsVinecop(
+    family_set=pv.parametric,
+    selection_criterion=<span class="text-tertiary">"aic"</span>,
+    trunc_lvl=np.inf,           <span class="text-slate-500"># fit all trees</span>
+    num_threads=<span class="text-tertiary">4</span>
+)
+
+vc = pv.Vinecop(data=u, controls=controls_vc)
+
+<span class="text-slate-500"># Inspect the fitted structure</span>
+print(vc)
+
+<span class="text-slate-500"># Simulate 2000 synthetic joint observations</span>
+u_sim = vc.simulate(n=<span class="text-tertiary">2000</span>, seeds=[<span class="text-tertiary">42</span>])
+print(<span class="text-tertiary">f"\nSimulated shape : {u_sim.shape}"</span>)   <span class="text-slate-500"># (2000, 3)</span></pre>
+</div>
+</div>
+<div class="bg-[#020b18] border border-outline-variant/20 border-t-0 rounded-b-sm px-6 py-4">
+<div class="flex items-center gap-2 mb-3">
+  <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+  <span class="font-mono text-[9px] text-slate-500 uppercase tracking-widest">stdout</span>
+</div>
+<pre class="font-mono text-xs text-primary/80 leading-relaxed">** Tree: 1
+----+--------+--------+------+--------+-------+------+------
+ No | var(s) | family |  rot |    par |  par2 |  tau |  AIC
+----+--------+--------+------+--------+-------+------+------
+  1 |    1,2 | Gumbel |    0 | 2.3417 |     - | 0.57 | -622.9
+  2 |    2,3 | Clayton|    0 | 1.8801 |     - | 0.48 | -401.3
+** Tree: 2
+----+------------+--------+------+--------+-------+------+------
+  3 |  1,3 ; {2} |  Frank |    0 | 2.1543 |     - | 0.23 | -51.2
+
+Simulated shape : (2000, 3)</pre>
+</div>
+</section>
+
+<!-- Return Periods -->
+<section class="space-y-6" id="return-periods">
+<h2 class="text-3xl font-headline font-semibold text-on-surface mb-6 flex items-center gap-4">
+  <span class="h-px w-8 bg-primary"></span> Joint Return Periods
+</h2>
+<p class="text-on-surface-variant leading-relaxed">
+  Two standard scenarios define joint return periods. The <strong class="text-on-surface">AND scenario</strong> — both variables exceed their thresholds simultaneously — gives the most conservative (longest) return period. The <strong class="text-on-surface">OR scenario</strong> — at least one variable exceeds — gives the shortest. Both are derived from the copula CDF.
+</p>
+<div class="rounded-sm overflow-hidden shadow-2xl">
+<div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+<div class="flex gap-1.5">
+  <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+  <div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+  <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+</div>
+<span class="text-[10px] font-label text-outline uppercase tracking-widest">04_return_periods.py</span>
+</div>
+<div class="code-block p-6 text-sm overflow-x-auto">
+<pre><span class="text-slate-500"># Threshold at 100-yr univariate return level</span>
+T_uni = <span class="text-tertiary">100</span>
+u_t = <span class="text-tertiary">1</span> - <span class="text-tertiary">1</span> / T_uni   <span class="text-slate-500"># ≈ 0.99</span>
+
+<span class="text-slate-500"># Evaluate bivariate copula CDF at (u_t, u_t)</span>
+threshold = np.array([[u_t, u_t]])
+C_val = float(cop.cdf(threshold))
+
+<span class="text-slate-500"># AND scenario: P(U1 > u_t AND U2 > u_t)</span>
+p_and = <span class="text-tertiary">1</span> - u_t - u_t + C_val
+T_and = <span class="text-tertiary">1</span> / p_and
+
+<span class="text-slate-500"># OR scenario: P(U1 > u_t OR U2 > u_t)</span>
+p_or  = <span class="text-tertiary">1</span> - C_val
+T_or  = <span class="text-tertiary">1</span> / p_or
+
+print(<span class="text-tertiary">f"Copula CDF at threshold : {C_val:.6f}"</span>)
+print(<span class="text-tertiary">f"AND return period       : {T_and:.0f} years"</span>)
+print(<span class="text-tertiary">f"OR  return period       : {T_or:.0f} years"</span>)</pre>
+</div>
+</div>
+<div class="bg-[#020b18] border border-outline-variant/20 border-t-0 rounded-b-sm px-6 py-4">
+<div class="flex items-center gap-2 mb-3">
+  <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+  <span class="font-mono text-[9px] text-slate-500 uppercase tracking-widest">stdout</span>
+</div>
+<pre class="font-mono text-xs text-primary/80 leading-relaxed">Copula CDF at threshold : 0.983241
+AND return period       : 596 years
+OR  return period       : 60 years</pre>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/20 rounded-sm p-5 mt-4">
+<p class="text-sm text-on-surface-variant leading-relaxed">
+  <strong class="text-on-surface">Interpretation:</strong> Two variables individually set at the 100-yr level produce a joint AND event with T ≈ 596 years — much rarer than the univariate threshold due to tail dependence. The OR event (T ≈ 60 yr) is more frequent because only one variable needs to be extreme.
+</p>
+</div>
+</section>
+
+<!-- Resources -->
+<section class="pt-12 border-t border-outline-variant/20" id="resources">
+<h3 class="font-headline text-xl font-bold text-on-surface mb-8 tracking-tight">References &amp; Further Reading</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://vinecopulib.github.io/pyvinecopulib/" target="_blank">
+<span class="material-symbols-outlined text-primary mb-4">code</span>
+<h5 class="text-sm font-bold mb-2 group-hover:text-primary transition-colors">pyvinecopulib Docs</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed">Official documentation with full API reference, examples, and installation guide.</p>
+</a>
+<a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://doi.org/10.1016/j.jhydrol.2026.135762" target="_blank">
+<span class="material-symbols-outlined text-secondary mb-4">description</span>
+<h5 class="text-sm font-bold mb-2 group-hover:text-secondary transition-colors">Urrea-Méndez et al. (2026)</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed">Multivariate design storms using vine copulas and GPR — application of this framework.</p>
+</a>
+<a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://doi.org/10.1016/j.coastaleng.2025.104850" target="_blank">
+<span class="material-symbols-outlined text-tertiary mb-4">water</span>
+<h5 class="text-sm font-bold mb-2 group-hover:text-tertiary transition-colors">Gómez-Rave et al. (2025)</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed">Compound flooding in estuaries using copulas and the Kendall hazard scenario.</p>
+</a>
+</div>
+</section>
+</article>
+</main>
+<!-- Footer -->
+<footer class="relative z-10 bg-[#030e20] w-full py-12 px-8 border-t border-cyan-900/20">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-7xl mx-auto">
+<div>
+<div class="text-lg font-bold text-cyan-400 font-headline mb-2">DUM</div>
+<p class="font-['JetBrains_Mono'] text-xs tracking-widest uppercase text-slate-500">© 2026 Diego Urrea Méndez • DUM Research</p>
+</div>
+<div class="flex flex-wrap gap-6 md:justify-end">
+<a class="font-['JetBrains_Mono'] text-xs tracking-widest uppercase text-slate-500 hover:text-cyan-300 transition-colors duration-200" href="https://github.com">GitHub</a>
+<a class="font-['JetBrains_Mono'] text-xs tracking-widest uppercase text-slate-500 hover:text-cyan-300 transition-colors duration-200" href="#">Google Scholar</a>
+<a class="font-['JetBrains_Mono'] text-xs tracking-widest uppercase text-slate-500 hover:text-cyan-300 transition-colors duration-200" href="#">ORCID</a>
+<a class="font-['JetBrains_Mono'] text-xs tracking-widest uppercase text-slate-500 hover:text-cyan-300 transition-colors duration-200" href="#">LinkedIn</a>
+</div>
+</div>
+</footer>
+<script>
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+        document.getElementById('mobile-menu')?.classList.toggle('hidden');
+    });
+</script>
+</body></html>

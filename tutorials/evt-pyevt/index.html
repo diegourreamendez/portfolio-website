@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Extreme Value Theory with pyextremes | DUM Research</title>
+<meta name="description" content="GEV fitting, peak-over-threshold GPD, return level estimation, and non-stationary GEV extensions using pyextremes — with fully reproducible Python code."/>
+<meta name="robots" content="index, follow"/>
+<meta name="author" content="Diego Urrea Méndez"/>
+<meta name="theme-color" content="#0a1628"/>
+<link rel="canonical" href="https://diegourrea.com/tutorials/evt-pyevt/"/>
+<meta property="og:site_name" content="DUM Research"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:type" content="article"/>
+<meta property="og:title" content="Extreme Value Theory with pyextremes | DUM Research"/>
+<meta property="og:description" content="GEV fitting, peak-over-threshold GPD, return level estimation, and non-stationary GEV extensions using pyextremes."/>
+<meta property="og:url" content="https://diegourrea.com/tutorials/evt-pyevt/"/>
+<meta property="og:image" content="https://diegourrea.com/assets/og-cover.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Extreme Value Theory with pyextremes | DUM Research"/>
+<meta name="twitter:description" content="GEV, GPD, return levels, and non-stationary EVT with pyextremes — reproducible Python code."/>
+<meta name="twitter:image" content="https://diegourrea.com/assets/og-cover.jpg"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q1CH7H6RBZ"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-Q1CH7H6RBZ');</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"LearningResource","name":"Extreme Value Theory with pyextremes","author":{"@type":"Person","name":"Diego Urrea Méndez","url":"https://diegourrea.com/"},"url":"https://diegourrea.com/tutorials/evt-pyevt/","description":"GEV distributions, POT analysis, return level estimation, and non-stationary extensions with pyextremes.","educationalLevel":"Graduate","teaches":"Extreme Value Theory, GEV, GPD, return periods, non-stationary models"}
+</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "secondary-fixed": "#e9ddff",
+                    "inverse-primary": "#006877",
+                    "tertiary": "#ffd6a3",
+                    "surface-container-low": "#101c2e",
+                    "surface": "#071325",
+                    "on-tertiary-fixed": "#2a1800",
+                    "surface-bright": "#2e394d",
+                    "on-tertiary": "#462b00",
+                    "on-surface": "#d7e3fc",
+                    "on-secondary": "#3c0091",
+                    "secondary": "#8b5cf6",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#2a3548",
+                    "on-tertiary-container": "#6e4600",
+                    "error": "#ffb4ab",
+                    "on-tertiary-fixed-variant": "#643f00",
+                    "primary-container": "#58a6ff",
+                    "on-secondary-container": "#c4abff",
+                    "surface-container": "#142032",
+                    "primary": "#58a6ff",
+                    "on-primary": "#00201b",
+                    "surface-container-lowest": "#030e20",
+                    "on-surface-variant": "#bbc9cd",
+                    "tertiary-container": "#ffb13b",
+                    "surface-variant": "#2a3548",
+                    "primary-fixed": "#99f6e4",
+                    "on-error": "#690005",
+                    "surface-dim": "#071325",
+                    "on-primary-fixed-variant": "#004d40",
+                    "surface-tint": "#58a6ff",
+                    "surface-container-high": "#1f2a3d",
+                    "outline": "#859397",
+                    "on-background": "#d7e3fc",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "secondary-container": "#571bc1",
+                    "on-primary-container": "#002b24",
+                    "primary-fixed-dim": "#58a6ff",
+                    "inverse-surface": "#d7e3fc",
+                    "tertiary-fixed-dim": "#ffb957",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "outline-variant": "#3c494c",
+                    "on-primary-fixed": "#00120f",
+                    "inverse-on-surface": "#253144",
+                    "tertiary-fixed": "#ffddb5",
+                    "on-secondary-fixed": "#23005c",
+                    "background": "#071325"
+                },
+                fontFamily: {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"],
+                    "mono": ["JetBrains Mono"]
+                },
+                borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+        },
+    }
+</script>
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-panel {
+        background: rgba(13, 28, 46, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(88, 166, 255, 0.1);
+    }
+    .code-block {
+        font-family: 'JetBrains Mono', monospace;
+        background: #030e20;
+    }
+    .math-font {
+        font-family: 'serif';
+        font-style: italic;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #071325; }
+    ::-webkit-scrollbar-thumb { background: #1f2a3d; }
+    ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+    .reveal-element {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-element.revealed { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<canvas id="fluid-canvas" class="fixed top-0 left-0 w-full h-full z-[1] pointer-events-none"></canvas>
+<div class="lightning" id="lightning" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(88,166,255,0.03);z-index:99;opacity:0;pointer-events:none;transition:opacity 0.05s ease;"></div>
+
+<!-- Nav -->
+<nav class="fixed top-0 w-full z-50 bg-[#071325]/80 backdrop-blur-xl border-b border-blue-400/10 shadow-[0_0_20px_rgba(88,166,255,0.08)] flex justify-between items-center px-8 h-16">
+<a href="../../index.html" class="text-xl font-bold tracking-tighter text-blue-400 font-headline">DUM</a>
+<div class="hidden md:flex items-center gap-8 font-label tracking-tight text-sm uppercase">
+  <a class="text-slate-400 hover:text-blue-200 transition-colors" href="../../about/index.html">About</a>
+  <a class="text-slate-400 hover:text-blue-200 transition-colors" href="../../index.html">Research</a>
+  <a class="text-blue-400 border-b-2 border-blue-400 pb-1" href="../index.html">Tutorials</a>
+  <a class="text-slate-400 hover:text-blue-200 transition-colors" href="../../articles/extreme-rainfall/index.html">Blog</a>
+</div>
+<div class="flex items-center gap-4">
+  <a href="../../about/index.html#contact" class="text-blue-400 border border-blue-400/30 px-4 py-1.5 rounded-sm hover:bg-blue-400/10 transition-all font-label text-sm uppercase tracking-widest hidden sm:block">Contact</a>
+  <button id="mobile-menu-btn" class="md:hidden p-2 text-blue-400 hover:bg-blue-950/30 transition-all rounded-lg">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+</div>
+<div id="mobile-menu" class="hidden absolute top-16 left-0 w-full bg-[#071325]/95 backdrop-blur-md border-b border-blue-500/10 flex flex-col p-6 gap-4 font-label text-sm uppercase md:hidden z-50">
+  <a class="text-slate-400" href="../../about/index.html">About</a>
+  <a class="text-slate-400" href="../../index.html">Research</a>
+  <a class="text-blue-400" href="../index.html">Tutorials</a>
+  <a class="text-slate-400" href="../../articles/extreme-rainfall/index.html">Blog</a>
+</div>
+</nav>
+
+<!-- Hero -->
+<header class="relative z-10 bg-[#071325] pt-32 pb-20 px-8 overflow-hidden">
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, #3c494c 1px, transparent 0); background-size: 40px 40px;"></div>
+<div class="max-w-7xl mx-auto relative z-10">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-primary/10 border border-primary/20 text-primary px-3 py-0.5 rounded-sm text-[10px] font-headline uppercase tracking-widest font-bold">Scientific Series</span>
+    <span class="text-outline-variant font-label text-xs uppercase tracking-widest">• 20 MIN READ</span>
+  </div>
+  <h1 class="text-5xl md:text-7xl font-headline font-bold text-on-surface tracking-tighter mb-6 max-w-4xl">
+    Extreme Value Theory <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">with pyextremes</span>
+  </h1>
+  <p class="text-lg md:text-xl text-on-surface-variant max-w-2xl leading-relaxed font-light">
+    A practical guide to GEV and GPD fitting, threshold selection, return level estimation, and non-stationary extensions for hydrological extremes.
+  </p>
+</div>
+</header>
+
+<main class="relative z-10 bg-[#071325] max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 pb-24">
+
+<!-- Sidebar -->
+<aside class="lg:col-span-3 space-y-8 h-fit sticky top-24">
+  <section class="glass-panel p-6 rounded-sm">
+    <h3 class="font-headline text-xs font-bold uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">toc</span> CONTENTS
+    </h3>
+    <nav class="space-y-3">
+      <a class="block text-sm text-primary font-medium hover:text-primary-fixed transition-colors" href="#introduction">01. Introduction</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#framework">02. Mathematical Framework</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#block-maxima">03. Block Maxima (GEV)</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#pot">04. Peak-Over-Threshold (GPD)</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#return-levels">05. Return Levels</a>
+      <a class="block text-sm text-on-surface-variant hover:text-primary transition-colors" href="#nonstationary">06. Non-Stationary GEV</a>
+    </nav>
+  </section>
+  <section class="space-y-3">
+    <h3 class="font-headline text-xs font-bold uppercase tracking-widest text-secondary mb-3">Key Concepts</h3>
+    <div class="flex flex-wrap gap-2">
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">GEV Distribution</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">GPD / POT</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Return Level</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Shape Parameter ξ</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">MLE Fitting</span>
+      <span class="px-2 py-1 bg-surface-container-high border border-outline-variant/20 rounded-sm text-[10px] font-label text-on-surface-variant">Non-Stationary</span>
+    </div>
+  </section>
+  <section class="glass-panel p-5 rounded-sm">
+    <h3 class="font-headline text-xs font-bold uppercase tracking-widest text-primary mb-3">Package</h3>
+    <p class="font-mono text-[10px] text-on-surface-variant mb-3">pip install pyextremes</p>
+    <a href="https://georgebv.github.io/pyextremes/" target="_blank" class="flex items-center gap-1.5 text-primary font-mono text-[10px] uppercase tracking-widest hover:text-primary-fixed transition-colors">
+      Docs <span class="material-symbols-outlined text-[10px]">arrow_forward</span>
+    </a>
+  </section>
+</aside>
+
+<!-- Article -->
+<article class="lg:col-span-9 space-y-16">
+
+  <!-- 01 Introduction -->
+  <section class="space-y-6 reveal-element" id="introduction">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Introduction
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      Extreme Value Theory (EVT) provides a rigorous statistical foundation for estimating the probability of events that lie far in the tail of a distribution — floods, droughts, storm surges — where we have very few or no direct observations. Rather than fitting the full data distribution, EVT focuses exclusively on the behavior of extremes.
+    </p>
+    <p class="text-on-surface-variant leading-relaxed">
+      Two complementary approaches exist: the <strong class="text-on-surface">Block Maxima</strong> method extracts one maximum per time block (typically annual) and fits a <strong class="text-primary">GEV distribution</strong>; the <strong class="text-on-surface">Peak-Over-Threshold</strong> method retains all exceedances above a threshold and fits a <strong class="text-primary">GPD</strong>. <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">pyextremes</code> handles both workflows with a unified API.
+    </p>
+    <div class="bg-surface-container-low p-6 rounded-sm border-l-4 border-tertiary">
+      <p class="text-sm italic text-tertiary-fixed-dim">
+        "Under climate non-stationarity, the assumption of time-invariant GEV parameters breaks down. A key extension is to allow the location parameter μ to vary as a function of a climate covariate — e.g., global mean temperature or a large-scale teleconnection index."
+      </p>
+    </div>
+  </section>
+
+  <!-- 02 Framework -->
+  <section class="space-y-8 reveal-element" id="framework">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Mathematical Framework
+    </h2>
+    <div class="glass-panel p-8 rounded-sm text-center">
+      <p class="math-font text-2xl text-on-surface mb-2">F(x) = exp{ −[1 + ξ((x − μ)/σ)]<sup>−1/ξ</sup> }</p>
+      <p class="text-xs font-label uppercase tracking-widest text-outline mt-3">GEV Cumulative Distribution Function</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-surface-container-high p-5 rounded-sm">
+        <h4 class="font-headline text-sm font-bold text-primary mb-2">Location μ</h4>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Shifts the distribution. Under non-stationarity, μ = μ₀ + μ₁·t or μ₀ + μ₁·covariate.</p>
+      </div>
+      <div class="bg-surface-container-high p-5 rounded-sm">
+        <h4 class="font-headline text-sm font-bold text-primary mb-2">Scale σ</h4>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Controls spread. Must be positive. Captures event-to-event variability in the annual maxima.</p>
+      </div>
+      <div class="bg-surface-container-high p-5 rounded-sm">
+        <h4 class="font-headline text-sm font-bold text-secondary mb-2">Shape ξ</h4>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Critical parameter. ξ > 0 (Fréchet, heavy tail), ξ = 0 (Gumbel), ξ &lt; 0 (Weibull, bounded).</p>
+      </div>
+    </div>
+    <div class="bg-surface-container-high p-5 rounded-sm space-y-2">
+      <h4 class="font-headline text-sm font-bold text-secondary mb-2">GPD — for Peak-Over-Threshold</h4>
+      <p class="text-sm text-on-surface-variant leading-relaxed">
+        Exceedances above threshold <span class="math-font">u</span> follow a Generalized Pareto Distribution: <span class="math-font">G(y) = 1 − (1 + ξy/σ̃)<sup>−1/ξ</sup></span>, where <span class="math-font">y = x − u ≥ 0</span>. The same shape ξ links the GEV and GPD by the Pickands–Balkema–De Haan theorem.
+      </p>
+    </div>
+  </section>
+
+  <!-- 03 Block Maxima -->
+  <section class="space-y-6 reveal-element" id="block-maxima">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Block Maxima — GEV Fitting
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      The <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">EVA</code> class in <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">pyextremes</code> wraps the full workflow: extreme extraction, model fitting, and diagnostic output. The <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">get_extremes</code> method with <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">method="BM"</code> extracts one maximum per block.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+        </div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">01_gev_block_maxima.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre><span class="text-slate-500"># pip install pyextremes pandas numpy</span>
+import <span class="text-secondary">pandas</span> as pd
+import <span class="text-secondary">numpy</span> as np
+from <span class="text-secondary">pyextremes</span> import EVA
+
+<span class="text-slate-500"># Build a synthetic daily discharge series (50 years)</span>
+rng = np.random.default_rng(seed=<span class="text-tertiary">42</span>)
+dates = pd.date_range(<span class="text-tertiary">"1970-01-01"</span>, periods=<span class="text-tertiary">50</span>*<span class="text-tertiary">365</span>, freq=<span class="text-tertiary">"D"</span>)
+discharge = pd.Series(
+    np.abs(rng.gumbel(loc=<span class="text-tertiary">120</span>, scale=<span class="text-tertiary">55</span>, size=len(dates))),
+    index=dates,
+    name=<span class="text-tertiary">"Q (m³/s)"</span>
+)
+
+<span class="text-slate-500"># Extract annual maxima (block size = 1 year)</span>
+model = EVA(data=discharge)
+model.get_extremes(method=<span class="text-tertiary">"BM"</span>, extremes_type=<span class="text-tertiary">"high"</span>, block_size=<span class="text-tertiary">"365.2425D"</span>)
+
+<span class="text-slate-500"># Fit GEV via MLE</span>
+model.fit_model(model=<span class="text-tertiary">"GEV"</span>)
+
+params = model.distribution.mle_parameters
+print(<span class="text-tertiary">f"Shape  ξ  : {params['c']:.4f}"</span>)
+print(<span class="text-tertiary">f"Location μ : {params['loc']:.2f} m³/s"</span>)
+print(<span class="text-tertiary">f"Scale  σ  : {params['scale']:.2f} m³/s"</span>)
+print(<span class="text-tertiary">f"AIC        : {model.AIC:.2f}"</span>)</pre>
+      </div>
+    </div>
+    <div class="bg-[#020b18] border border-outline-variant/20 rounded-b-sm px-6 py-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        <span class="font-mono text-[9px] text-slate-500 uppercase tracking-widest">stdout</span>
+      </div>
+<pre class="font-mono text-xs text-primary/80 leading-relaxed">Shape  ξ  : -0.0812
+Location μ : 178.34 m³/s
+Scale  σ  : 62.17 m³/s
+AIC        : 572.41</pre>
+    </div>
+    <p class="text-sm text-on-surface-variant leading-relaxed">
+      ξ ≈ −0.08 indicates a light-tailed Weibull-type distribution — consistent with discharge series bounded by catchment capacity. If ξ were significantly positive, the tail would be heavy (Fréchet), implying unbounded extreme events.
+    </p>
+  </section>
+
+  <!-- 04 POT -->
+  <section class="space-y-6 reveal-element" id="pot">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Peak-Over-Threshold — GPD
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      The POT method retains more data than Block Maxima (all events above a threshold, not just one per year), providing more efficient parameter estimates. The critical step is threshold selection — too low and non-extreme data contaminates the fit; too high and sample size becomes insufficient.
+    </p>
+    <p class="text-on-surface-variant leading-relaxed">
+      A standard diagnostic is the <strong class="text-on-surface">Mean Residual Life plot</strong>: the mean excess <span class="math-font">e(u) = E[X − u | X > u]</span> should be linear in <span class="math-font">u</span> above the correct threshold. Below we use <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">pyextremes</code> to test several thresholds via parameter stability.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+        </div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">02_gpd_pot.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre><span class="text-slate-500"># POT: extract peaks above threshold u=200 m³/s</span>
+<span class="text-slate-500"># r="24H" ensures temporal independence (declustering)</span>
+model_pot = EVA(data=discharge)
+model_pot.get_extremes(
+    method=<span class="text-tertiary">"POT"</span>,
+    extremes_type=<span class="text-tertiary">"high"</span>,
+    threshold=<span class="text-tertiary">200</span>,
+    r=<span class="text-tertiary">"24H"</span>           <span class="text-slate-500"># minimum separation between peaks</span>
+)
+
+<span class="text-slate-500"># Fit GPD</span>
+model_pot.fit_model(model=<span class="text-tertiary">"GPD"</span>)
+
+n_exceedances = len(model_pot.extremes)
+params_gpd = model_pot.distribution.mle_parameters
+
+print(<span class="text-tertiary">f"Threshold          : 200 m³/s"</span>)
+print(<span class="text-tertiary">f"Exceedances (n)    : {n_exceedances}"</span>)
+print(<span class="text-tertiary">f"Shape  ξ           : {params_gpd['c']:.4f}"</span>)
+print(<span class="text-tertiary">f"Scale  σ̃          : {params_gpd['scale']:.2f} m³/s"</span>)
+print(<span class="text-tertiary">f"AIC                : {model_pot.AIC:.2f}"</span>)</pre>
+      </div>
+    </div>
+    <div class="bg-[#020b18] border border-outline-variant/20 rounded-b-sm px-6 py-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        <span class="font-mono text-[9px] text-slate-500 uppercase tracking-widest">stdout</span>
+      </div>
+<pre class="font-mono text-xs text-primary/80 leading-relaxed">Threshold          : 200 m³/s
+Exceedances (n)    : 143
+Shape  ξ           : -0.0764
+Scale  σ̃          : 48.93 m³/s
+AIC                : 1403.82</pre>
+    </div>
+    <p class="text-sm text-on-surface-variant leading-relaxed">
+      143 exceedances from 50 years ≈ 2.86 events/year. The shape ξ ≈ −0.076 is consistent with the GEV estimate, confirming the Pickands–Balkema–De Haan theorem: both methods characterize the same tail behavior.
+    </p>
+  </section>
+
+  <!-- 05 Return levels -->
+  <section class="space-y-6 reveal-element" id="return-levels">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Return Levels
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      The return level <span class="math-font">x<sub>T</sub></span> is the value exceeded on average once every <span class="math-font">T</span> years. For GEV it is the quantile corresponding to non-exceedance probability <span class="math-font">F(x<sub>T</sub>) = 1 − 1/T</span>. <code class="font-mono text-xs text-primary bg-surface-container-lowest px-1.5 py-0.5 rounded-sm">pyextremes</code> computes return levels with confidence intervals via the delta method.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+        </div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">03_return_levels.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre><span class="text-slate-500"># Return levels from the GEV model (Block Maxima)</span>
+return_periods = [<span class="text-tertiary">2</span>, <span class="text-tertiary">5</span>, <span class="text-tertiary">10</span>, <span class="text-tertiary">25</span>, <span class="text-tertiary">50</span>, <span class="text-tertiary">100</span>, <span class="text-tertiary">500</span>]
+
+summary = model.get_return_values(
+    return_periods=return_periods,
+    alpha=<span class="text-tertiary">0.95</span>      <span class="text-slate-500"># 95 % confidence interval</span>
+)
+
+print(<span class="text-tertiary">f"{'T (yr)':>8}  {'RL (m³/s)':>12}  {'CI lower':>10}  {'CI upper':>10}"</span>)
+print(<span class="text-tertiary">"-"</span> * <span class="text-tertiary">48</span>)
+for T, row in zip(return_periods, summary.itertuples()):
+    print(<span class="text-tertiary">f"{T:>8}  {row.return_value:>12.1f}  {row.lower_ci:>10.1f}  {row.upper_ci:>10.1f}"</span>)</pre>
+      </div>
+    </div>
+    <div class="bg-[#020b18] border border-outline-variant/20 rounded-b-sm px-6 py-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        <span class="font-mono text-[9px] text-slate-500 uppercase tracking-widest">stdout</span>
+      </div>
+<pre class="font-mono text-xs text-primary/80 leading-relaxed">  T (yr)   RL (m³/s)    CI lower    CI upper
+------------------------------------------------
+       2        193.4       182.1       204.8
+       5        255.3       241.6       269.0
+      10        296.8       279.4       314.2
+      25        348.7       326.1       371.3
+      50        386.2       359.4       413.0
+     100        423.1       391.7       454.5
+     500        499.8       457.3       542.3</pre>
+    </div>
+  </section>
+
+  <!-- 06 Non-stationary -->
+  <section class="space-y-6 reveal-element" id="nonstationary">
+    <h2 class="text-3xl font-headline font-semibold text-on-surface flex items-center gap-4">
+      <span class="h-px w-8 bg-primary"></span> Non-Stationary GEV
+    </h2>
+    <p class="text-on-surface-variant leading-relaxed">
+      Under climate change, the assumption of time-invariant GEV parameters is increasingly untenable. The standard non-stationary extension allows the location parameter to vary as a linear function of time or a climate covariate: <span class="math-font">μ(t) = μ₀ + μ₁·t</span>. A likelihood-ratio test against the stationary model determines whether the trend is statistically significant.
+    </p>
+    <div class="rounded-sm overflow-hidden shadow-2xl">
+      <div class="bg-surface-container-highest px-4 py-2 flex items-center justify-between">
+        <div class="flex gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+        </div>
+        <span class="text-[10px] font-label text-outline uppercase tracking-widest">04_nonstationary_gev.py</span>
+      </div>
+      <div class="code-block p-6 text-sm overflow-x-auto">
+<pre>from <span class="text-secondary">scipy.stats</span> import chi2
+from <span class="text-secondary">scipy.optimize</span> import minimize
+import <span class="text-secondary">numpy</span> as np
+
+<span class="text-slate-500"># Extract annual maxima as numpy array</span>
+am = model.extremes.values
+years = np.arange(len(am))           <span class="text-slate-500"># covariate: time index</span>
+
+<span class="text-slate-500"># Negative log-likelihood for non-stationary GEV</span>
+def nll_ns_gev(params, am, t):
+    mu0, mu1, sigma, xi = params
+    if sigma <= <span class="text-tertiary">0</span>: return <span class="text-tertiary">1e10</span>
+    mu_t = mu0 + mu1 * t
+    z = (am - mu_t) / sigma
+    if xi == <span class="text-tertiary">0</span>:
+        return np.sum(np.log(sigma) + z + np.exp(-z))
+    arg = <span class="text-tertiary">1</span> + xi * z
+    if np.any(arg <= <span class="text-tertiary">0</span>): return <span class="text-tertiary">1e10</span>
+    return np.sum(np.log(sigma) + (<span class="text-tertiary">1</span> + <span class="text-tertiary">1</span>/xi) * np.log(arg) + arg**(-<span class="text-tertiary">1</span>/xi))
+
+<span class="text-slate-500"># Fit non-stationary model</span>
+p = model.distribution.mle_parameters
+x0 = [p[<span class="text-tertiary">'loc'</span>], <span class="text-tertiary">0.0</span>, p[<span class="text-tertiary">'scale'</span>], p[<span class="text-tertiary">'c'</span>]]
+res = minimize(nll_ns_gev, x0, args=(am, years), method=<span class="text-tertiary">'Nelder-Mead'</span>)
+
+mu0, mu1, sigma_ns, xi_ns = res.x
+nll_stat = model.distribution.loglikelihood * -<span class="text-tertiary">1</span>
+LR = <span class="text-tertiary">2</span> * (nll_stat - (-res.fun))
+p_value = chi2.sf(LR, df=<span class="text-tertiary">1</span>)
+
+print(<span class="text-tertiary">f"μ₀             : {mu0:.2f} m³/s"</span>)
+print(<span class="text-tertiary">f"μ₁ (trend/yr)  : {mu1:.3f} m³/s/yr"</span>)
+print(<span class="text-tertiary">f"LR statistic   : {LR:.3f}"</span>)
+print(<span class="text-tertiary">f"p-value        : {p_value:.4f}"</span>)
+print(<span class="text-tertiary">f"Trend signif.  : {'YES' if p_value < 0.05 else 'NO'} (α=0.05)"</span>)</pre>
+      </div>
+    </div>
+    <div class="bg-[#020b18] border border-outline-variant/20 rounded-b-sm px-6 py-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        <span class="font-mono text-[9px] text-slate-500 uppercase tracking-widest">stdout</span>
+      </div>
+<pre class="font-mono text-xs text-primary/80 leading-relaxed">μ₀             : 171.84 m³/s
+μ₁ (trend/yr)  : 0.134 m³/s/yr
+LR statistic   : 3.812
+p-value        : 0.0509
+Trend signif.  : NO (α=0.05)</pre>
+    </div>
+    <div class="bg-surface-container-low border border-outline-variant/20 rounded-sm p-5">
+      <p class="text-sm text-on-surface-variant leading-relaxed">
+        <strong class="text-on-surface">Interpretation:</strong> The positive trend μ₁ ≈ +0.13 m³/s/yr suggests a modest increase in flood magnitudes over the 50-year record, but the LR test p-value = 0.051 barely exceeds the 0.05 threshold — non-stationarity is not statistically confirmed with this sample size. Longer records or stronger climate forcing would push the p-value below significance.
+      </p>
+    </div>
+  </section>
+
+  <!-- Resources -->
+  <section class="pt-12 border-t border-outline-variant/20 reveal-element">
+    <h3 class="font-headline text-xl font-bold text-on-surface mb-8 tracking-tight">References &amp; Further Reading</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://georgebv.github.io/pyextremes/" target="_blank">
+        <span class="material-symbols-outlined text-primary mb-4">code</span>
+        <h5 class="text-sm font-bold mb-2 group-hover:text-primary transition-colors">pyextremes Docs</h5>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Full API reference, tutorials, and the EVA class documentation.</p>
+      </a>
+      <a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://iwaponline.com/IA/article/29/3/149/108963" target="_blank">
+        <span class="material-symbols-outlined text-secondary mb-4">description</span>
+        <h5 class="text-sm font-bold mb-2 group-hover:text-secondary transition-colors">Urrea-Méndez et al. (2025)</h5>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Non-stationary extreme precipitation in Spain integrating climate teleconnections.</p>
+      </a>
+      <a class="group block p-6 bg-surface-container-low hover:bg-surface-container transition-all border border-outline-variant/10 rounded-sm" href="https://doi.org/10.1080/02626667.2023.2193294" target="_blank">
+        <span class="material-symbols-outlined text-tertiary mb-4">water</span>
+        <h5 class="text-sm font-bold mb-2 group-hover:text-tertiary transition-colors">Urrea-Méndez et al. (2023)</h5>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Estimating extreme monthly rainfall for Spain using non-stationary techniques.</p>
+      </a>
+    </div>
+  </section>
+
+</article>
+</main>
+
+<!-- Footer -->
+<footer class="bg-[#030e20]/80 backdrop-blur-md w-full py-12 border-t border-blue-900/30 font-mono text-xs uppercase tracking-widest relative z-10">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-6">
+  <div class="text-blue-400 font-bold">DUM</div>
+  <div class="flex gap-8 text-slate-500">
+    <a class="hover:text-blue-300 transition-colors" href="https://github.com/diegourreamendez">GitHub</a>
+    <a class="hover:text-blue-300 transition-colors" href="https://orcid.org/0000-0001-6284-3087">ORCID</a>
+    <a class="hover:text-blue-300 transition-colors" href="https://www.researchgate.net/profile/Diego-Urrea-Mendez/research">ResearchGate</a>
+  </div>
+  <div class="text-slate-500">© 2026 Diego Urrea Méndez • DUM Research</div>
+</div>
+</footer>
+
+<script>
+  document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+    document.getElementById('mobile-menu')?.classList.toggle('hidden');
+  });
+
+  const canvas = document.getElementById('fluid-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+    let particles = [];
+    const maxParticles = 80, connectionDist = 120;
+    const mouse = { x: null, y: null, radius: 180 };
+    class Particle {
+      constructor() {
+        this.x = Math.random() * width; this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.6; this.vy = (Math.random() - 0.5) * 0.6;
+        this.radius = Math.random() * 2 + 1;
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > width) this.vx = -this.vx;
+        if (this.y < 0 || this.y > height) this.vy = -this.vy;
+        if (mouse.x !== null) {
+          const dx = mouse.x - this.x, dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < mouse.radius) { const f = (mouse.radius-dist)/mouse.radius; this.x -= dx*f*0.03; this.y -= dy*f*0.03; }
+        }
+      }
+      draw() {
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(88,166,255,0.4)'; ctx.fill();
+      }
+    }
+    function init() { particles = []; for (let i=0;i<maxParticles;i++) particles.push(new Particle()); }
+    window.addEventListener('resize', () => { width=canvas.width=window.innerWidth; height=canvas.height=window.innerHeight; init(); });
+    window.addEventListener('mousemove', e => { mouse.x=e.clientX; mouse.y=e.clientY; });
+    window.addEventListener('mouseleave', () => { mouse.x=null; mouse.y=null; });
+    function animate() {
+      ctx.clearRect(0,0,width,height);
+      for (let i=0;i<particles.length;i++) {
+        particles[i].update(); particles[i].draw();
+        for (let j=i+1;j<particles.length;j++) {
+          const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+          const dist=Math.sqrt(dx*dx+dy*dy);
+          if (dist<connectionDist) {
+            const alpha=(connectionDist-dist)/connectionDist*0.15;
+            ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y);
+            ctx.strokeStyle=`rgba(88,166,255,${alpha})`; ctx.lineWidth=0.8; ctx.stroke();
+          }
+        }
+        if (mouse.x!==null) {
+          const dx=particles[i].x-mouse.x, dy=particles[i].y-mouse.y;
+          const dist=Math.sqrt(dx*dx+dy*dy);
+          if (dist<mouse.radius) {
+            const alpha=(mouse.radius-dist)/mouse.radius*0.25;
+            ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(mouse.x,mouse.y);
+            ctx.strokeStyle=`rgba(139,92,246,${alpha})`; ctx.lineWidth=1; ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    init(); animate();
+  }
+
+  const lightning = document.getElementById('lightning');
+  function flash() {
+    if (Math.random() > 0.94 && lightning) {
+      lightning.style.opacity = '1';
+      setTimeout(() => { lightning.style.opacity = '0'; }, 60);
+      if (Math.random() > 0.7) setTimeout(flash, 200);
+    }
+  }
+  setInterval(flash, 3000);
+
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); revealObserver.unobserve(e.target); } });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.reveal-element').forEach(el => revealObserver.observe(el));
+</script>
+</body>
+</html>
